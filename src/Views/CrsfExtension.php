@@ -26,8 +26,8 @@ class CrsfExtension extends \Twig_Extension
     public function crsfField()
     {
         return '
-        <input type="hidden" name="' . $this->guard->getTokenNameKey() . '" id="input " class="form-control" value="' . $this->guard->getTokenName() . '">
-        <input type="hidden" name="' . $this->guard->getTokenValueKey() . '" id="input " class="form-control" value="' . $this->guard->getTokenValue() . '">
+        <input type="hidden" name="' . $this->guard->getTokenNameKey() . '" id="' . $this->guard->getTokenNameKey() . '" class="form-control" value="' . $this->guard->getTokenName() . '">
+        <input type="hidden" name="' . $this->guard->getTokenValueKey() . '" id="' . $this->guard->getTokenValueKey() . '" class="form-control" value="' . $this->guard->getTokenValue() . '">
         ';
     }
 }

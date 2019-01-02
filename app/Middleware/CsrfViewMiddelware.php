@@ -8,8 +8,8 @@ class CsrfViewMiddelware extends Middelware
     {
         $this->container->view->getEnvironment()->addGlobal('csrf', [
             'field' => '
-                <input type="hidden" name="' . $this->container->csrf->getTokenNameKey() . '" id="input " class="form-control" value="' . $this->container->csrf->getTokenName() . '">
-                <input type="hidden" name="' . $this->container->csrf->getTokenValueKey() . '" id="input " class="form-control" value="' . $this->container->csrf->getTokenValue() . '">
+                <input type="hidden" name="' . $this->container->csrf->getTokenNameKey() . '" id="' . $this->container->csrf->getTokenNameKey() . '" class="form-control" value="' . $this->container->csrf->getTokenName() . '">
+                <input type="hidden" name="' . $this->container->csrf->getTokenValueKey() . '" id="' . $this->container->csrf->getTokenValueKey() . '" class="form-control" value="' . $this->container->csrf->getTokenValue() . '">
             ',
         ]);
         $response = $next($request, $response);

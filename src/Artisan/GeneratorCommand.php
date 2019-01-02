@@ -21,8 +21,8 @@ abstract class GeneratorCommand
      */
     protected $type;
 
-    public $info;
-    public $error;
+    public $info = [];
+    public $error = [];
 
     protected $path;
 
@@ -65,7 +65,7 @@ abstract class GeneratorCommand
         if ((! $this->hasOption('force') ||
              ! $this->option('force')) &&
              $this->alreadyExists($this->getNameInput())) {
-            $this->error = $this->type.' already exists!';
+            $this->error[] = $this->type.' already exists!';
 
             return false;
         }
@@ -77,7 +77,7 @@ abstract class GeneratorCommand
 
         $this->files->put($path, $this->buildClass($name));
 
-        $this->info = $this->type.' created successfully.';
+        $this->info[] = $this->type.' created successfully.';
     }
 
     /**

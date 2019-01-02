@@ -6,6 +6,7 @@ use App\Controllers\Controller;
 use \Input;
 use Illuminate\Filesystem\Filesystem;
 use SlimApp\Artisan\ControllerMakeCommand;
+use SlimApp\Artisan\MiddlewareMakeCommand;
 
 class ArtisanController extends Controller
 {
@@ -30,20 +31,16 @@ class ArtisanController extends Controller
         $api        = $type == 'api' ? true : false;
 
         $a = new ControllerMakeCommand(new Filesystem, [
-            'name'      => Input::post('clase'),
+            'name'      => Input::post('name'),
             'model'     => Input::post('model'),
             'resource'  => $resource,
             'invokable' => $invokable,
             'parent'    => $parent,
             'api'       => $api,
-            'model'     => Input::post('model'),
             'force'     => Input::post('force'),
         ]);
 
-        return $response->withJson([
-            'info'  => $a->info,
-            'error' => $a->error,
-        ]);
+        return $response->withJson(['info'  => $a->info, 'error' => $a->error]);
     }
 
     /**
@@ -51,7 +48,12 @@ class ArtisanController extends Controller
      */
     public function makeMiddelware($request, $response)
     {
-        echo "makeMiddelware";
+        $a = new MiddlewareMakeCommand(new Filesystem, [
+            'name'      => Input::post('name'),
+            'force'     => Input::post('force'),
+        ]);
+
+        return $response->withJson(['info'  => $a->info, 'error' => $a->error]);
     }
 
     /**

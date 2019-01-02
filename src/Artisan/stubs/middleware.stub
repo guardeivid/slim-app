@@ -9,12 +9,16 @@ class DummyClass
     /**
      * Handle an incoming request.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \Psr\Http\Message\ServerRequestInterface $request
+     * @param  \Psr\Http\Message\ResponseInterface      $response
      * @param  \Closure  $next
      * @return mixed
      */
-    public function handle($request, Closure $next)
+    public function __invoke($request, $response, Closure $next)
     {
-        return $next($request);
+        //
+
+        $response = $next($request, $response);
+        return $response;
     }
 }
