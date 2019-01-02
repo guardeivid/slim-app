@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <title>{{ title }}</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    {% for metaname, metavalue in meta %}
+    <meta name="{{metaname}}" value="{{metavalue}}" />
+    {% endfor %}
+
+    <!-- publish javascript variable -->
+    <script>
+        var global = {{global|json_encode|raw}}
+    </script>
+    {#}
+    <!-- Include registered css -->
+    <link rel="stylesheet" href="{{nodeUrl}}bootstrap/4.1.0/css/bootstrap.min.css"
+     />
+    {#}
+    {% block css %}{% endblock %}
+</head>
+<body>
+    <div id="wrapper">
+        {#}{% include 'lecturas/topbar.twig' %}{#}
+        <div class="container-fluid">
+            <div class="row">
+                {% block content %}
+                    Contenido
+                {% endblock %}
+            </div>
+        </div>
+    </div>
+    <!-- /#wrapper -->
+
+    {#}
+    <!-- Include registered javascript -->
+    <script src="{{nodeUrl}}jquery/jquery-3.3.1.min.js"></script>
+    <script src="{{nodeUrl}}popper.js/1.14.0/umd/popper.min.js"></script>
+    <script src="{{nodeUrl}}bootstrap/4.1.0/js/bootstrap.min.js"></script>
+    <script src="{{nodeUrl}}feather-icons/dist/feather.min.js"></script>
+    <script src="{{assetUrl}}js/lecturas/common.js"></script>
+    {#}
+    {% block js %}{% endblock %}
+</body>
+</html>

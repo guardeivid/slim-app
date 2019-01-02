@@ -1,0 +1,97 @@
+<?php
+
+namespace DummyNamespace;
+
+use DummyFullModelClass;
+use DummyRootNamespaceControllers\Controller;
+
+class DummyClass extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     *
+     * @param  \Psr\Http\Message\ServerRequestInterface $request
+     * @param  \Psr\Http\Message\ResponseInterface      $response
+     * @return \Psr\Http\Message\ResponseInterface
+     */
+    public function index($request, $response)
+    {
+        //
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @param  \Psr\Http\Message\ServerRequestInterface $request
+     * @param  \Psr\Http\Message\ResponseInterface      $response
+     * @return \Psr\Http\Message\ResponseInterface
+     */
+    public function create($request, $response)
+    {
+        //
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Psr\Http\Message\ServerRequestInterface $request
+     * @param  \Psr\Http\Message\ResponseInterface      $response
+     * @return \Psr\Http\Message\ResponseInterface
+     */
+    public function store($request, $response)
+    {
+        //
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  \Psr\Http\Message\ServerRequestInterface $request
+     * @param  \Psr\Http\Message\ResponseInterface      $response
+     * @param  array                                    $args
+     * @return \Psr\Http\Message\ResponseInterface
+     */
+    public function show($request, $response, $args)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  \Psr\Http\Message\ServerRequestInterface $request
+     * @param  \Psr\Http\Message\ResponseInterface      $response
+     * @param  array                                    $args
+     * @return \Psr\Http\Message\ResponseInterface
+     */
+    public function edit($request, $response, $args)
+    {
+        //
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Psr\Http\Message\ServerRequestInterface $request
+     * @param  \Psr\Http\Message\ResponseInterface      $response
+     * @param  array                                    $args
+     * @return \Psr\Http\Message\ResponseInterface
+     */
+    public function update($request, $response, $args)
+    {
+        //
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  \Psr\Http\Message\ServerRequestInterface $request
+     * @param  \Psr\Http\Message\ResponseInterface      $response
+     * @param  array                                    $args
+     * @return \Psr\Http\Message\ResponseInterface
+     */
+    public function destroy($request, $response, $args)
+    {
+        //
+    }
+}

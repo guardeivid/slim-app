@@ -1,0 +1,20 @@
+<?php
+
+namespace DummyNamespace;
+
+use DummyRootNamespaceControllers\Controller;
+
+class DummyClass extends Controller
+{
+    /**
+     * Handle the incoming request.
+     *
+     * @param  \Psr\Http\Message\ServerRequestInterface $request
+     * @param  \Psr\Http\Message\ResponseInterface      $response
+     * @return \Psr\Http\Message\ResponseInterface
+     */
+    public function __invoke($request, $response, $args)
+    {
+        //
+    }
+}
