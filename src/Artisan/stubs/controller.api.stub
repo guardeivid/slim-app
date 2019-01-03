@@ -9,8 +9,9 @@ class DummyClass extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @param  \Psr\Http\Message\ServerRequestInterface $request
-     * @param  \Psr\Http\Message\ResponseInterface      $response
+     * @param \Psr\Http\Message\ServerRequestInterface $request
+     * @param \Psr\Http\Message\ResponseInterface      $response
+     *
      * @return \Psr\Http\Message\ResponseInterface
      */
     public function index($request, $response)
@@ -21,8 +22,9 @@ class DummyClass extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Psr\Http\Message\ServerRequestInterface $request
-     * @param  \Psr\Http\Message\ResponseInterface      $response
+     * @param \Psr\Http\Message\ServerRequestInterface $request
+     * @param \Psr\Http\Message\ResponseInterface      $response
+     *
      * @return \Psr\Http\Message\ResponseInterface
      */
     public function store($request, $response)
@@ -33,9 +35,10 @@ class DummyClass extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \Psr\Http\Message\ServerRequestInterface $request
-     * @param  \Psr\Http\Message\ResponseInterface      $response
-     * @param  array                                    $args
+     * @param \Psr\Http\Message\ServerRequestInterface $request
+     * @param \Psr\Http\Message\ResponseInterface      $response
+     *
+     * @param array                                    $args
      * @return \Psr\Http\Message\ResponseInterface
      */
     public function show($request, $response, $args)
@@ -46,9 +49,10 @@ class DummyClass extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Psr\Http\Message\ServerRequestInterface $request
-     * @param  \Psr\Http\Message\ResponseInterface      $response
-     * @param  array                                    $args
+     * @param \Psr\Http\Message\ServerRequestInterface $request
+     * @param \Psr\Http\Message\ResponseInterface      $response
+     * @param array                                    $args
+     *
      * @return \Psr\Http\Message\ResponseInterface
      */
     public function update($request, $response, $args)
@@ -59,9 +63,10 @@ class DummyClass extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \Psr\Http\Message\ServerRequestInterface $request
-     * @param  \Psr\Http\Message\ResponseInterface      $response
-     * @param  array                                    $args
+     * @param \Psr\Http\Message\ServerRequestInterface $request
+     * @param \Psr\Http\Message\ResponseInterface      $response
+     * @param array                                    $args
+     *
      * @return \Psr\Http\Message\ResponseInterface
      */
     public function destroy($request, $response, $args)

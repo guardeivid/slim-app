@@ -11,7 +11,7 @@ $app->get('/home2', 'App\Controllers\HomeController:index');
 
 $app->get('/', function ($request, $response)
 {
-    
+
     //$validator = $this->validator;
 
     //var_dump($validator);
@@ -29,15 +29,15 @@ $app->get('/', function ($request, $response)
 });
 
 use SlimApp\Artisan\ArtisanController as Art;
-$app->group('/artisan', function(){
+$app->group('/artisan', function() {
 
     $this->get('', Art::class . ':index')->setName('artisan');
     $this->get('/models', Art::class . ':getModels');
 
-    $this->group('/make', function(){
+    $this->group('/make', function() {
         $this->post('/auth', Art::class . ':makeAuth');
         $this->post('/controller', Art::class . ':makeController');
-        $this->post('/middelware', Art::class . ':makeMiddelware');
+        $this->post('/middleware', Art::class . ':makeMiddleware');
         $this->post('/migration', Art::class . ':makeMigration');
         $this->post('/model', Art::class . ':makeModel');
         $this->post('/seeder', Art::class . ':makeSeeder');

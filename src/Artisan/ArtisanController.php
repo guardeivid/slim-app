@@ -44,9 +44,9 @@ class ArtisanController extends Controller
     }
 
     /**
-     * Create a new controller class.
+     * Create a new middleware class.
      */
-    public function makeMiddelware($request, $response)
+    public function makeMiddleware($request, $response)
     {
         $a = new MiddlewareMakeCommand(new Filesystem, [
             'name'      => Input::post('name'),

@@ -3,7 +3,9 @@
 namespace SlimApp\Artisan;
 
 use Illuminate\Support\Str;
+use Illuminate\Filesystem\Filesystem;
 use SlimApp\Artisan\GeneratorCommand;
+use SlimApp\Artisan\ControllerMakeCommand;
 
 class ModelMakeCommand extends GeneratorCommand
 {
@@ -40,10 +42,10 @@ class ModelMakeCommand extends GeneratorCommand
         }
 
         if ($this->option('all')) {
-            $this->input->setOption('factory', true);
-            $this->input->setOption('migration', true);
-            $this->input->setOption('controller', true);
-            $this->input->setOption('resource', true);
+            $this->setOption('factory', true);
+            $this->setOption('migration', true);
+            $this->setOption('controller', true);
+            $this->setOption('resource', true);
         }
 
         if ($this->option('factory')) {
@@ -68,10 +70,10 @@ class ModelMakeCommand extends GeneratorCommand
     {
         $factory = Str::studly(class_basename($this->option('name')));
 
-        $this->call('make:factory', [
+        /*$this->call('make:factory', [
             'name' => "{$factory}Factory",
             '--model' => $this->qualifyClass($this->getNameInput()),
-        ]);
+        ]);*/
     }
 
     /**
@@ -87,10 +89,10 @@ class ModelMakeCommand extends GeneratorCommand
             $table = Str::singular($table);
         }
 
-        $this->call('make:migration', [
+        /*$this->call('make:migration', [
             'name' => "create_{$table}_table",
             '--create' => $table,
-        ]);
+        ]);*/
     }
 
     /**
@@ -108,6 +110,21 @@ class ModelMakeCommand extends GeneratorCommand
             'name' => "{$controller}Controller",
             '--model' => $this->option('resource') ? $modelName : null,
         ]);
+
+        $a = new ControllerMakeCommand(new Filesystem, [
+            'name'      => "{$controller}Controller",
+            'model'     => $this->option('resource') ? $modelName : null,
+            'resource'  => $this->option('resource') ? true : null,
+            'force'     => $this->option('force'),
+        ]);
+
+        if ($a->info) {
+            $this->info[] = $a->info;
+        }
+
+        if ($a->error) {
+            $this->error[] = $a->error;
+        }
     }
 
     /**

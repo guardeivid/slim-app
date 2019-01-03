@@ -252,4 +252,17 @@ abstract class GeneratorCommand
         return $this->options[$name] ? true : false;
     }
 
+    /**
+     * Set the value of a command option.
+     *
+     * @param  string|null  $key
+     * @param  mix          $value
+     * @return string|array|null
+     */
+    public function setOption($key, $value)
+    {
+        $this->options[$key] = $value;
+    }
+
+
 }

@@ -9,9 +9,10 @@ class DummyClass
     /**
      * Handle an incoming request.
      *
-     * @param  \Psr\Http\Message\ServerRequestInterface $request
-     * @param  \Psr\Http\Message\ResponseInterface      $response
-     * @param  \Closure  $next
+     * @param \Psr\Http\Message\ServerRequestInterface $request
+     * @param \Psr\Http\Message\ResponseInterface      $response
+     * @param \Closure                                 $next
+     *
      * @return mixed
      */
     public function __invoke($request, $response, Closure $next)

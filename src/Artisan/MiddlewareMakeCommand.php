@@ -1,8 +1,8 @@
 <?php
 
-namespace Illuminate\Routing\Console;
+namespace SlimApp\Artisan;
 
-use Illuminate\Console\GeneratorCommand;
+use SlimApp\Artisan\GeneratorCommand;
 
 class MiddlewareMakeCommand extends GeneratorCommand
 {
@@ -45,6 +45,6 @@ class MiddlewareMakeCommand extends GeneratorCommand
      */
     protected function getDefaultNamespace($rootNamespace)
     {
-        return $rootNamespace.'\Http\Middleware';
+        return $rootNamespace.'\Middleware';
     }
 }

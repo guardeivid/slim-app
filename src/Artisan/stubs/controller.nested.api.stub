@@ -12,7 +12,8 @@ class DummyClass extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @param  \ParentDummyFullModelClass  $ParentDummyModelVariable
+     * @param \ParentDummyFullModelClass  $ParentDummyModelVariable
+     *
      * @return \Illuminate\Http\Response
      */
     public function index(ParentDummyModelClass $ParentDummyModelVariable)
@@ -23,8 +24,9 @@ class DummyClass extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \ParentDummyFullModelClass  $ParentDummyModelVariable
+     * @param \Illuminate\Http\Request  $request
+     * @param \ParentDummyFullModelClass  $ParentDummyModelVariable
+     *
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request, ParentDummyModelClass $ParentDummyModelVariable)
@@ -35,8 +37,9 @@ class DummyClass extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \ParentDummyFullModelClass  $ParentDummyModelVariable
-     * @param  \DummyFullModelClass  $DummyModelVariable
+     * @param \ParentDummyFullModelClass  $ParentDummyModelVariable
+     * @param \DummyFullModelClass  $DummyModelVariable
+     *
      * @return \Illuminate\Http\Response
      */
     public function show(ParentDummyModelClass $ParentDummyModelVariable, DummyModelClass $DummyModelVariable)
@@ -47,9 +50,10 @@ class DummyClass extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \ParentDummyFullModelClass  $ParentDummyModelVariable
-     * @param  \DummyFullModelClass  $DummyModelVariable
+     * @param \Illuminate\Http\Request  $request
+     * @param \ParentDummyFullModelClass  $ParentDummyModelVariable
+     * @param \DummyFullModelClass  $DummyModelVariable
+     *
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, ParentDummyModelClass $ParentDummyModelVariable, DummyModelClass $DummyModelVariable)
@@ -60,8 +64,9 @@ class DummyClass extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \ParentDummyFullModelClass  $ParentDummyModelVariable
-     * @param  \DummyFullModelClass  $DummyModelVariable
+     * @param \ParentDummyFullModelClass  $ParentDummyModelVariable
+     * @param \DummyFullModelClass  $DummyModelVariable
+     *
      * @return \Illuminate\Http\Response
      */
     public function destroy(ParentDummyModelClass $ParentDummyModelVariable, DummyModelClass $DummyModelVariable)
