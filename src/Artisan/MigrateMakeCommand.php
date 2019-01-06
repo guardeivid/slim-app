@@ -1,9 +1,9 @@
 <?php
 
-namespace Illuminate\Database\Console\Migrations;
+namespace SlimApp\Artisan;
 
 use Illuminate\Support\Str;
-use Illuminate\Support\Composer;
+use Illuminate\Filesystem\Filesystem;
 use Illuminate\Database\Migrations\MigrationCreator;
 use SlimApp\Artisan\GeneratorCommand;
 
@@ -27,6 +27,15 @@ class MigrateMakeCommand extends GeneratorCommand
      */
     protected $description = 'Create a new migration file';
 
+    const CREATE_PATTERNS = [
+        '/^create_(\w+)_table$/',
+        '/^create_(\w+)$/',
+    ];
+    const CHANGE_PATTERNS = [
+        '/_(to|from|in)_(\w+)_table$/',
+        '/_(to|from|in)_(\w+)$/',
+    ];
+
     /**
      * The migration creator instance.
      *
@@ -35,25 +44,16 @@ class MigrateMakeCommand extends GeneratorCommand
     protected $creator;
 
     /**
-     * The Composer instance.
-     *
-     * @var \Illuminate\Support\Composer
-     */
-    protected $composer;
-
-    /**
      * Create a new migration install command instance.
      *
-     * @param  \Illuminate\Database\Migrations\MigrationCreator  $creator
-     * @param  \Illuminate\Support\Composer  $composer
+     * @param  \Illuminate\Database\Migrations\MigrationCreator  
      * @return void
      */
-    public function __construct(MigrationCreator $creator, Composer $composer)
+    public function __construct(MigrationCreator $creator, Filesystem $files, $options)
     {
-        parent::__construct();
-
         $this->creator = $creator;
-        $this->composer = $composer;
+
+        parent::__construct($files, $options);
     }
 
     /**
@@ -85,15 +85,14 @@ class MigrateMakeCommand extends GeneratorCommand
         // "create" in the name. This will allow us to provide a convenient way
         // of creating migrations that create new tables for the application.
         if (! $table) {
-            [$table, $create] = TableGuesser::guess($name);
+            //[$table, $create] = $this->guess($name);
+            list($table, $create) = $this->guess($name);
         }
 
         // Now we are ready to write the migration out to disk. Once we've written
         // the migration out, we will dump-autoload for the entire framework to
         // make sure that the migrations are registered by the class loaders.
         $this->writeMigration($name, $table, $create);
-
-        $this->composer->dumpAutoloads();
     }
 
     /**
@@ -110,7 +109,7 @@ class MigrateMakeCommand extends GeneratorCommand
             $name, $this->getMigrationPath(), $table, $create
         ), PATHINFO_FILENAME);
 
-        $this->line("<info>Created Migration:</info> {$file}");
+        $this->info[] = "Created Migration: {$file}";
     }
 
     /**
@@ -122,11 +121,12 @@ class MigrateMakeCommand extends GeneratorCommand
     {
         if (! is_null($targetPath = $this->option('path'))) {
             return ! $this->usingRealPath()
-                            ? $this->laravel->basePath().'/'.$targetPath
+                            ? ROOT_PATH . $targetPath
                             : $targetPath;
         }
 
-        return parent::getMigrationPath();
+        //Get the path to the migration directory.
+        return ROOT_PATH.'database'.DIRECTORY_SEPARATOR.'migrations';
     }
 
     /**
@@ -138,4 +138,25 @@ class MigrateMakeCommand extends GeneratorCommand
     {
         return $this->hasOption('realpath') && $this->option('realpath');
     }
+
+    /**
+     * Attempt to guess the table name and "creation" status of the given migration.
+     *
+     * @param  string  $migration
+     * @return array
+     */
+    public static function guess($migration)
+    {
+        foreach (self::CREATE_PATTERNS as $pattern) {
+            if (preg_match($pattern, $migration, $matches)) {
+                return [$matches[1], $create = true];
+            }
+        }
+        foreach (self::CHANGE_PATTERNS as $pattern) {
+            if (preg_match($pattern, $migration, $matches)) {
+                return [$matches[2], $create = false];
+            }
+        }
+    }
+
 }

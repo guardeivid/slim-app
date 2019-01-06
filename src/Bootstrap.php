@@ -118,7 +118,9 @@ class Bootstrap
     {
         // add Slim CSRF
         $this->container['csrf'] = function($c){
-            return new \Slim\Csrf\Guard;
+            $csrf = new \Slim\Csrf\Guard;
+            $csrf->setPersistentTokenMode(true);
+            return $csrf;
         };
     }
 

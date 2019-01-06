@@ -7,6 +7,9 @@ use \Input;
 use Illuminate\Filesystem\Filesystem;
 use SlimApp\Artisan\ControllerMakeCommand;
 use SlimApp\Artisan\MiddlewareMakeCommand;
+use SlimApp\Artisan\MigrationCreator;
+use SlimApp\Artisan\MigrateMakeCommand;
+use SlimApp\Artisan\ModelMakeCommand;
 
 class ArtisanController extends Controller
 {
@@ -15,7 +18,7 @@ class ArtisanController extends Controller
      */
     public function index($request, $response)
     {
-        //$this->view->render($response, 'artisan/index.twig');
+        
         $this->view->render($response, 'artisan/artisan.twig');
     }
 
@@ -25,18 +28,14 @@ class ArtisanController extends Controller
     public function makeController($request, $response, $args)
     {
         $type       = Input::post('type');
-        $resource   = $type == 'resource' ? true : false;
-        $invokable  = $type == 'invokable' ? true : false;
-        $parent     = $type == 'parent' ? true : false;
-        $api        = $type == 'api' ? true : false;
 
         $a = new ControllerMakeCommand(new Filesystem, [
             'name'      => Input::post('name'),
             'model'     => Input::post('model'),
-            'resource'  => $resource,
-            'invokable' => $invokable,
-            'parent'    => $parent,
-            'api'       => $api,
+            'resource'  => $type == 'resource' ? true : false,
+            'invokable' => $type == 'invokable' ? true : false,
+            'parent'    => $type == 'parent' ? true : false,
+            'api'       => $type == 'api' ? true : false,
             'force'     => Input::post('force'),
         ]);
 
@@ -61,7 +60,19 @@ class ArtisanController extends Controller
      */
     public function makeMigration($request, $response)
     {
-        echo "makeMigration";
+        $a = new MigrateMakeCommand(
+            new MigrationCreator(new Filesystem), 
+            new Filesystem, [
+                'name'   => Input::post('name'),
+                'table'  => Input::post('table'),
+                'create' => Input::post('type') == 'create' ? true : false,
+                'path'     => null, //save in database/migrations
+                'realpath' => null,
+                'force'  => Input::post('force'),
+            ]
+        );
+
+        return $response->withJson(['info'  => $a->info, 'error' => $a->error]);
     }
 
     /**
@@ -69,7 +80,18 @@ class ArtisanController extends Controller
      */
     public function makeModel($request, $response)
     {
-        echo "makeModel";
+        $a = new ModelMakeCommand(new Filesystem, [
+            'name'      => Input::post('name'),
+            'all'       => Input::post('all'),
+            'factory'   => Input::post('factory'),
+            'migration' => Input::post('migration'),
+            'controller'=> Input::post('controller'),
+            'resource'  => Input::post('resource'),
+            'pivot'     => Input::post('pivot'),
+            'force'     => Input::post('force'),
+        ]);
+
+        return $response->withJson(['info'  => $a->info, 'error' => $a->error]);
     }
 
     /**
@@ -104,91 +126,26 @@ class ArtisanController extends Controller
 
 /*
 
-1. make:controller
-This command creates a new controller file in app/Http/Controllers folder.
+    4. make:seeder
+    Create a new database seeder class.
 
-Example usage:
+    Example usage:
 
-php artisan make:controller UserController
-Parameters:
+    php artisan make:seeder BooksTableSeeder
+    Parameters: none.
 
---resource
-The controller will contain a method for each of the available resource operations – index(), create(), store(), show(), edit(), update(), destroy().
+    8. make:auth
+    Example usage:
 
---model=Photo
-If you are using route model binding and would like the resource controller’s methods to type-hint a model instance.
+    php artisan make:auth
+    Scaffold basic login and registration views and routes.
 
---parent=Photo
-Officially undocumented parameter, in the code it says “Generate a nested resource controller class” but for me it failed to generate a Controller properly. So probably work in progress.
+    Parameters:
 
-2. make:model
-Create a new Eloquent model class.
+    --views
+    Only scaffold the authentication views.
 
-Example usage:
-
-php artisan make:model Photo
-Parameters:
-
---migration
-Create a new migration file for the model.
-
---controller
-Create a new controller for the model.
-
---resource
-Indicates if the generated controller should be a resource controller.
-
-Yes, you’ve got it right, you can do it like this:
-
-php artisan make:model Project --migration --controller --resource
-Or even shorter:
-
-php artisan make:model Project -mcr
-3. make:migration
-Create a new migration file.
-
-Example usage:
-
-php artisan make:migration create_projects_table
-Parameters:
-
---create=Table
-The table to be created.
-
---table=Table
-The table to migrate.
-
---path=Path
-The location where the migration file should be created.
-
-4. make:seeder
-Create a new database seeder class.
-
-Example usage:
-
-php artisan make:seeder BooksTableSeeder
-Parameters: none.
-
-6. make:middleware
-Create a new middleware class.
-
-Example usage:
-
-php artisan make:middleware CheckAge
-Parameters: none.
-
-8. make:auth
-Example usage:
-
-php artisan make:auth
-Scaffold basic login and registration views and routes.
-
-Parameters:
-
---views
-Only scaffold the authentication views.
-
---force
-Overwrite existing views by default.
+    --force
+    Overwrite existing views by default.
 
 */

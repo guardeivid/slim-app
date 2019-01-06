@@ -3,9 +3,7 @@
 namespace SlimApp\Artisan;
 
 use Illuminate\Support\Str;
-use Illuminate\Filesystem\Filesystem;
 use SlimApp\Artisan\GeneratorCommand;
-use SlimApp\Artisan\ControllerMakeCommand;
 
 class ModelMakeCommand extends GeneratorCommand
 {
@@ -72,7 +70,7 @@ class ModelMakeCommand extends GeneratorCommand
 
         /*$this->call('make:factory', [
             'name' => "{$factory}Factory",
-            '--model' => $this->qualifyClass($this->getNameInput()),
+            'model' => $this->qualifyClass($this->getNameInput()),
         ]);*/
     }
 
@@ -89,10 +87,10 @@ class ModelMakeCommand extends GeneratorCommand
             $table = Str::singular($table);
         }
 
-        /*$this->call('make:migration', [
+        $this->call('make:migration', [
             'name' => "create_{$table}_table",
-            '--create' => $table,
-        ]);*/
+            'create' => $table,
+        ]);
     }
 
     /**
@@ -108,23 +106,10 @@ class ModelMakeCommand extends GeneratorCommand
 
         $this->call('make:controller', [
             'name' => "{$controller}Controller",
-            '--model' => $this->option('resource') ? $modelName : null,
+            'model' => $this->option('resource') ? $modelName : null,
+            //'resource'  => $this->option('resource') ? true : null,
+            //'force'     => $this->option('force'),
         ]);
-
-        $a = new ControllerMakeCommand(new Filesystem, [
-            'name'      => "{$controller}Controller",
-            'model'     => $this->option('resource') ? $modelName : null,
-            'resource'  => $this->option('resource') ? true : null,
-            'force'     => $this->option('force'),
-        ]);
-
-        if ($a->info) {
-            $this->info[] = $a->info;
-        }
-
-        if ($a->error) {
-            $this->error[] = $a->error;
-        }
     }
 
     /**
@@ -149,7 +134,7 @@ class ModelMakeCommand extends GeneratorCommand
      */
     protected function getDefaultNamespace($rootNamespace)
     {
-        return $rootNamespace;
+        return $rootNamespace.'\Models';
     }
 
     /**

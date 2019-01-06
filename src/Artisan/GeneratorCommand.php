@@ -4,8 +4,12 @@ namespace SlimApp\Artisan;
 
 use Illuminate\Support\Str;
 use Illuminate\Filesystem\Filesystem;
+use SlimApp\Artisan\ControllerMakeCommand;
+use SlimApp\Artisan\MigrationCreator;
+use SlimApp\Artisan\MigrateMakeCommand;
+use SlimApp\Artisan\ModelMakeCommand;
 
-abstract class GeneratorCommand
+/*abstract */class GeneratorCommand
 {
     /**
      * The filesystem instance.
@@ -45,7 +49,7 @@ abstract class GeneratorCommand
      *
      * @return string
      */
-    abstract protected function getStub();
+    /*abstract protected function getStub();*/
 
     /**
      * Execute the console command.
@@ -264,5 +268,32 @@ abstract class GeneratorCommand
         $this->options[$key] = $value;
     }
 
+    public function call($command, $options)
+    {
+        $a = [];
+
+        if ($command == 'make:controller') {
+            $a = new ControllerMakeCommand(new Filesystem, $options);
+        } elseif ($command == 'make:migration') {
+            $a = new MigrateMakeCommand(
+                new MigrationCreator(new Filesystem), 
+                new Filesystem, $options
+            );
+        } elseif ($command == 'make:model') {
+            $a = new ModelMakeCommand(new Filesystem, $options);
+        } elseif ($command == 'make:factory') {
+            //$a = new FactoryMakeCommand(new Filesystem, $options);
+        }
+
+        if (isset($a)) {
+            if ($a->info) {
+                $this->info[] = $a->info[0];
+            }
+
+            if ($a->error) {
+                $this->error[] = $a->error[0];
+            }
+        }        
+    }
 
 }
