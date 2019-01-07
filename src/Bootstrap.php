@@ -5,6 +5,7 @@ namespace SlimApp;
 use \Illuminate\Database\Capsule\Manager as DatabaseManager;
 use \SlimFacades\Facade;
 use Respect\Validation\Validator as v;
+use SlimApp\Artisan\ArtisanController as Art;
 
 /**
  * SlimApp Bootstrapper, initialize all the thing needed on the start
@@ -19,7 +20,8 @@ class Bootstrap
      * SlimApp Bootstrap constructor
      * @param \Slim\App $app
      */
-    public function __construct(\Slim\App $app = null){
+    public function __construct(\Slim\App $app = null)
+    {
         $this->app = $app;
         $this->container = $app->getContainer();
     }
@@ -28,7 +30,8 @@ class Bootstrap
      * Setup SlimApp configuration and inject it to Slim instance
      * @param array $config
      */
-    public function setConfig($config){
+    public function setConfig($config)
+    {
         $this->config = $config;
         //foreach ($config as $key => $value) {
         //    $this->app->config($key, $value);
@@ -39,7 +42,8 @@ class Bootstrap
      * Setting up slim instance for slim app
      * @param SlimApp $app [description]
      */
-    public function setApp(\Slim\App $app){
+    public function setApp(\Slim\App $app)
+    {
         $this->app = $app;
         $this->container = $app->getContainer();
     }
@@ -48,7 +52,8 @@ class Bootstrap
      * Boot up Slim Facade accessor
      * @param  Array $config
      */
-    public function bootFacade($config){
+    public function bootFacade($config)
+    {
         Facade::setFacadeApplication($this->app);
         $this->registerAliases($config);
     }
@@ -100,7 +105,8 @@ class Bootstrap
      * Boot up Eloquent ORM Pagination and inject to Slim container
      * @param  Array $config
      */
-    public function bootPagination(){
+    public function bootPagination()
+    {
         $container = $this->container;
         \Illuminate\Pagination\Paginator::currentPageResolver(
             function ($pageName = 'page') use ($container) {
@@ -136,7 +142,7 @@ class Bootstrap
                 [
                     ROOT_PATH . 'src/Artisan/views',
                     $c['settings']['viewTemplatesDirectory']
-                ], 
+                ],
                 $config
             );
 
@@ -144,15 +150,12 @@ class Bootstrap
             $uri = \Slim\Http\Uri::createFromEnvironment(new \Slim\Http\Environment($_SERVER));
             $view->addExtension(
                 new \Slim\Views\TwigExtension(
-                    $c->get('router'), 
+                    $c->get('router'),
                     $uri
                 )
             );
 
-            $view->addExtension(
-                new \SlimApp\Views\CrsfExtension(
-                    $c->get('csrf'))
-            );
+            $view->addExtension(new \SlimApp\Views\CrsfExtension($c->get('csrf')));
 
             return $view;
         };
@@ -169,6 +172,29 @@ class Bootstrap
         v::with('App\\Validation\\Rules\\');
     }
 
+    public function bootArtisan($artisan)
+    {
+        if ($artisan['enable']) {
+            $this->container['migration_table'] = isset($artisan['migration-table']) ? isset($artisan['migration-table']) : 'migrations';
+
+            //Routes
+            $this->app->group('/artisan', function() {
+
+                $this->get('', Art::class . ':index')->setName('artisan');
+                $this->get('/models', Art::class . ':getModels');
+
+                $this->group('/make', function() {
+                    $this->post('/auth', Art::class . ':makeAuth');
+                    $this->post('/controller', Art::class . ':makeController');
+                    $this->post('/middleware', Art::class . ':makeMiddleware');
+                    $this->post('/migration', Art::class . ':makeMigration');
+                    $this->post('/model', Art::class . ':makeModel');
+                    $this->post('/seeder', Art::class . ':makeSeeder');
+                });
+            })->add(new \App\Middleware\LocalHostMiddleware($this->container));
+        }
+    }
+
     /**
      * Run the boot sequence
      * @return [type] [description]
@@ -181,6 +207,7 @@ class Bootstrap
         $this->bootValidator($this->config['translator']);
         $this->bootCsrf();
         $this->bootTwig($this->config['twig']);
+        $this->bootArtisan($this->config['artisan']);
     }
 
     /**

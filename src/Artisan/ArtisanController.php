@@ -4,22 +4,32 @@ namespace SlimApp\Artisan;
 
 use App\Controllers\Controller;
 use \Input;
+use \Container;
 use Illuminate\Filesystem\Filesystem;
 use SlimApp\Artisan\ControllerMakeCommand;
 use SlimApp\Artisan\MiddlewareMakeCommand;
 use SlimApp\Artisan\MigrationCreator;
 use SlimApp\Artisan\MigrateMakeCommand;
 use SlimApp\Artisan\ModelMakeCommand;
+use SlimApp\Artisan\SeederMakeCommand;
 
 class ArtisanController extends Controller
 {
+
+    public function __construct()
+    {
+        parent::__construct(Container::self());
+        $this->file = new \Illuminate\Filesystem\Filesystem;
+    }
+
+
     /**
      * Page artisan.
      */
     public function index($request, $response)
     {
-        
-        $this->view->render($response, 'artisan/artisan.twig');
+
+        $this->view->render($response, 'artisan/index.twig');
     }
 
     /**
@@ -29,7 +39,7 @@ class ArtisanController extends Controller
     {
         $type       = Input::post('type');
 
-        $a = new ControllerMakeCommand(new Filesystem, [
+        $a = new ControllerMakeCommand($this->file, [
             'name'      => Input::post('name'),
             'model'     => Input::post('model'),
             'resource'  => $type == 'resource' ? true : false,
@@ -47,7 +57,7 @@ class ArtisanController extends Controller
      */
     public function makeMiddleware($request, $response)
     {
-        $a = new MiddlewareMakeCommand(new Filesystem, [
+        $a = new MiddlewareMakeCommand($this->file, [
             'name'      => Input::post('name'),
             'force'     => Input::post('force'),
         ]);
@@ -61,8 +71,8 @@ class ArtisanController extends Controller
     public function makeMigration($request, $response)
     {
         $a = new MigrateMakeCommand(
-            new MigrationCreator(new Filesystem), 
-            new Filesystem, [
+            new MigrationCreator($this->file),
+            $this->file, [
                 'name'   => Input::post('name'),
                 'table'  => Input::post('table'),
                 'create' => Input::post('type') == 'create' ? true : false,
@@ -80,7 +90,7 @@ class ArtisanController extends Controller
      */
     public function makeModel($request, $response)
     {
-        $a = new ModelMakeCommand(new Filesystem, [
+        $a = new ModelMakeCommand($this->file, [
             'name'      => Input::post('name'),
             'all'       => Input::post('all'),
             'factory'   => Input::post('factory'),
@@ -99,7 +109,9 @@ class ArtisanController extends Controller
      */
     public function makeSeeder($request, $response)
     {
-        echo "makeSeeder";
+        $a = new SeederMakeCommand($this->file, ['name' => Input::post('name')]);
+
+        return $response->withJson(['info'  => $a->info, 'error' => $a->error]);
     }
 
     /**
@@ -109,8 +121,6 @@ class ArtisanController extends Controller
     {
         echo "makeAuth";
     }
-
-
 
     public function getModels($request, $response)
     {
@@ -122,18 +132,37 @@ class ArtisanController extends Controller
         return $response->withJson($files);
     }
 
+
+    /**
+     * .
+     */
+    public function migrate($request, $response)
+    {
+        $this->initMigrate();
+
+        $a = new MigrateCommand($this->migrator, $this->resolver, [
+        ]);
+
+        return $response->withJson(['info'  => $a->info, 'error' => $a->error]);
+    }
+
+    /**
+     * Init migrate
+     */
+    protected function initMigrate()
+    {
+        $this->resolver = new \Illuminate\Database\ConnectionResolver(['default' => $this->db]);
+        $this->resolver->setDefaultConnection('default');
+
+        $this->repository = new \Illuminate\Database\Migrations\DatabaseMigrationRepository($this->resolver, $this->migration_table);
+
+        $this->migrator = new \Illuminate\Database\Migrations\Migrator($this->repository, $this->resolver, $this->file);
+
+    }
+
 }
 
 /*
-
-    4. make:seeder
-    Create a new database seeder class.
-
-    Example usage:
-
-    php artisan make:seeder BooksTableSeeder
-    Parameters: none.
-
     8. make:auth
     Example usage:
 

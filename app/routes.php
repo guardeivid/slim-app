@@ -9,37 +9,21 @@ $app->get('/home', function ($request, $response)
 
 $app->get('/home2', 'App\Controllers\HomeController:index');
 
-$app->get('/', function ($request, $response)
-{
+$app->get('/', function ($request, $response) {
 
     //$validator = $this->validator;
-
-    //var_dump($validator);
+    $host = $request->getUri()->getHost();
+    echo "hola";
+    //var_dump($host == 'localhost' or $host == '127.0.0.1');
     //die();
 
-    $validation = $this->validator->validate($request, [
+    /*$validation = $this->validator->validate($request, [
         'name' => v::positive()->noWhitespace()->boolVal()
-    ]);
+    ]);*/
 
     //var_dump($validation);
     //var_dump($validation->failed());
-    var_dump($validation->getErrors());
+    //var_dump($validation->getErrors());
     //die();
     //return \Response::redirect('home');
-});
-
-use SlimApp\Artisan\ArtisanController as Art;
-$app->group('/artisan', function() {
-
-    $this->get('', Art::class . ':index')->setName('artisan');
-    $this->get('/models', Art::class . ':getModels');
-
-    $this->group('/make', function() {
-        $this->post('/auth', Art::class . ':makeAuth');
-        $this->post('/controller', Art::class . ':makeController');
-        $this->post('/middleware', Art::class . ':makeMiddleware');
-        $this->post('/migration', Art::class . ':makeMigration');
-        $this->post('/model', Art::class . ':makeModel');
-        $this->post('/seeder', Art::class . ':makeSeeder');
-    });
 });

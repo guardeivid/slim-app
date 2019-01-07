@@ -10,49 +10,18 @@
     <title>Artisan</title>
 
     <!-- Bootstrap core CSS -->
-    <link href="{{ base_url() }}/css/bootstrap.min.css" rel="stylesheet">
+    <link href="http://localhost/slimapp/css/bootstrap.min.css" rel="stylesheet">
 
     <!-- Custom styles for this template -->
-    <link href="{{ base_url() }}/css/dashboard.css" rel="stylesheet">
+    <link href="http://localhost/slimapp/css/dashboard.css" rel="stylesheet">
   </head>
 
   <body>
-    <div id="main">
-      <nav class="navbar navbar-dark bg-dark flex-md-nowrap p-0 shadow">
-        <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#">Artisan</a>
-        <ul class="navbar-nav px-3">
-          <li class="nav-item text-nowrap">
-            <a class="nav-link" href="#">Sign out</a>
-          </li>
-        </ul>
-      </nav>
-
-      <div class="container-fluid">
-        <div class="row">
-          {% include 'artisan/navigation.twig' %}
-
-          <main class="col-md-9 ml-sm-auto col-lg-10 px-4">
-            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-              <h1 class="h2" v-text="title"></h1>
-              {#}<span v-text="info"></span>
-              ${ info }{#}
-            </div>
-            <router-view></router-view>
-          </main>
-        </div>
-      </div>
-    </div>
-
-
-    <script src="{{ base_url() }}/js/vue.js"></script>
-    <script src="{{ base_url() }}/js/vue-router.min.js"></script>
-
-    <!-- Icons -->
+      <div id="main"></div>
+      {{ crsf_field() | raw }}
     <script src="https://unpkg.com/feather-icons/dist/feather.min.js"></script>
-    <script>
-      feather.replace();
-    </script>
-
-    <script src="{{ base_url() }}/js/index.js"></script>
+	<script type="text/javascript" src="static/js/manifest.37a2ecbb1d1b7e6c9ada.js"></script>
+	<script type="text/javascript" src="static/js/vendor.62b7bbbb17475f2a51d4.js"></script>
+	<script type="text/javascript" src="static/js/app.7b6ab9e5a0298e9d4d9a.js"></script>
   </body>
 </html>

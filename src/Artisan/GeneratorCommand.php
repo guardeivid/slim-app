@@ -36,7 +36,7 @@ use SlimApp\Artisan\ModelMakeCommand;
      * @param  \Illuminate\Filesystem\Filesystem  $files
      * @return void
      */
-    public function __construct(Filesystem $files, $options)
+    public function __construct(Filesystem $files = null, $options = [])
     {
         $this->files = $files;
         $this->options = $options;
@@ -273,16 +273,15 @@ use SlimApp\Artisan\ModelMakeCommand;
         $a = [];
 
         if ($command == 'make:controller') {
-            $a = new ControllerMakeCommand(new Filesystem, $options);
+            $a = new ControllerMakeCommand($this->files, $options);
         } elseif ($command == 'make:migration') {
-            $a = new MigrateMakeCommand(
-                new MigrationCreator(new Filesystem), 
-                new Filesystem, $options
-            );
+            $a = new MigrateMakeCommand(new MigrationCreator($this->files), $this->files, $options);
         } elseif ($command == 'make:model') {
-            $a = new ModelMakeCommand(new Filesystem, $options);
+            $a = new ModelMakeCommand($this->files, $options);
         } elseif ($command == 'make:factory') {
-            //$a = new FactoryMakeCommand(new Filesystem, $options);
+            //$a = new FactoryMakeCommand($this->files, $options);
+        } elseif ($command == 'db:seed') {
+            $a = new SeedCommand($this->resolver, $options);
         }
 
         if (isset($a)) {
@@ -293,7 +292,48 @@ use SlimApp\Artisan\ModelMakeCommand;
             if ($a->error) {
                 $this->error[] = $a->error[0];
             }
-        }        
+        }
+    }
+
+
+    /**
+     * Get all of the migration paths.
+     *
+     * @return array
+     */
+    protected function getMigrationPaths()
+    {
+        // Here, we will check to see if a path option has been defined. If it has we will
+        // use the path relative to the root of the installation folder so our database
+        // migrations may be run for any customized path from within the application.
+        if ($this->input->hasOption('path') && $this->option('path')) {
+            return collect($this->option('path'))->map(function ($path) {
+                return ! $this->usingRealPath()
+                                ? ROOT_PATH.'/'.$path
+                                : $path;
+            })->all();
+        }
+        return array_merge(
+            $this->migrator->paths(), [$this->getMigrationPath()]
+        );
+    }
+    /**
+     * Determine if the given path(s) are pre-resolved "real" paths.
+     *
+     * @return bool
+     */
+    protected function usingRealPath()
+    {
+        return $this->input->hasOption('realpath') && $this->option('realpath');
+    }
+    /**
+     * Get the path to the migration directory.
+     *
+     * @return string
+     */
+    protected function getMigrationPath()
+    {
+        return ROOT_PATH.'database'.DIRECTORY_SEPARATOR.'migrations';
     }
 
 }
