@@ -151,13 +151,22 @@ class ArtisanController extends Controller
      */
     protected function initMigrate()
     {
-        $this->resolver = new \Illuminate\Database\ConnectionResolver(['default' => $this->db]);
+
+        $this->resolver = new \Illuminate\Database\ConnectionResolver(
+            ['default' => $this->db->getConnection()]
+        );
         $this->resolver->setDefaultConnection('default');
 
-        $this->repository = new \Illuminate\Database\Migrations\DatabaseMigrationRepository($this->resolver, $this->migration_table);
+        $this->repository = new \Illuminate\Database\Migrations\DatabaseMigrationRepository(
+            $this->resolver,
+            $this->migration_table
+        );
 
-        $this->migrator = new \Illuminate\Database\Migrations\Migrator($this->repository, $this->resolver, $this->file);
-
+        $this->migrator = new \Illuminate\Database\Migrations\Migrator(
+            $this->repository,
+            $this->resolver,
+            $this->file
+        );
     }
 
 }

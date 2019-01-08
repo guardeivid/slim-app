@@ -71,11 +71,16 @@ class MigrateCommand extends GeneratorCommand
         // Next, we will check to see if a path option has been defined. If it has
         // we will use the path relative to the root of this installation folder
         // so that migrations may be run for any path within the applications.
-        $this->migrator->setOutput($this->output)
-                ->run($this->getMigrationPaths(), [
-                    'pretend' => $this->option('pretend'),
-                    'step' => $this->option('step'),
-                ]);
+        $migrations = $this->migrator->run(
+            $this->getMigrationPaths(),
+            [
+                'pretend' => $this->option('pretend'),
+                'step' => $this->option('step'),
+            ]
+        );
+
+        var_dump($migrations);
+        var_dump($this->migrator->getNotes());
 
         // Finally, if the "seed" option has been given, we will re-run the database
         // seed task to re-populate the database, which is convenient when adding

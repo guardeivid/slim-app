@@ -27,3 +27,5 @@ $app->get('/', function ($request, $response) {
     //die();
     //return \Response::redirect('home');
 });
+
+$app->get('/migrate', 'SlimApp\Artisan\ArtisanController:migrate');

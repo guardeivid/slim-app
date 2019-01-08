@@ -8,6 +8,7 @@ use SlimApp\Artisan\ControllerMakeCommand;
 use SlimApp\Artisan\MigrationCreator;
 use SlimApp\Artisan\MigrateMakeCommand;
 use SlimApp\Artisan\ModelMakeCommand;
+use SlimApp\Artisan\SeedCommand;
 
 /*abstract */class GeneratorCommand
 {
@@ -306,7 +307,7 @@ use SlimApp\Artisan\ModelMakeCommand;
         // Here, we will check to see if a path option has been defined. If it has we will
         // use the path relative to the root of the installation folder so our database
         // migrations may be run for any customized path from within the application.
-        if ($this->input->hasOption('path') && $this->option('path')) {
+        if ($this->hasOption('path') && $this->option('path')) {
             return collect($this->option('path'))->map(function ($path) {
                 return ! $this->usingRealPath()
                                 ? ROOT_PATH.'/'.$path
@@ -324,7 +325,7 @@ use SlimApp\Artisan\ModelMakeCommand;
      */
     protected function usingRealPath()
     {
-        return $this->input->hasOption('realpath') && $this->option('realpath');
+        return $this->hasOption('realpath') && $this->option('realpath');
     }
     /**
      * Get the path to the migration directory.
