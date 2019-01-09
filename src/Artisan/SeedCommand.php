@@ -2,9 +2,11 @@
 
 namespace SlimApp\Artisan;
 
+use \ReflectionClass;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\ConnectionResolverInterface as Resolver;
 use SlimApp\Artisan\GeneratorCommand;
+use App\database\seeds\DatabaseSeeder;
 
 class SeedCommand extends GeneratorCommand
 {
@@ -54,6 +56,7 @@ class SeedCommand extends GeneratorCommand
 
         Model::unguarded(function () {
             $this->getSeeder()->__invoke();
+            $this->note = array_merge($this->note, $this->seeder->getNotes());
         });
     }
 
@@ -64,9 +67,11 @@ class SeedCommand extends GeneratorCommand
      */
     protected function getSeeder()
     {
-        $class = $this->laravel->make($this->option('class'));
-
-        return $class->setContainer($this->laravel)->setCommand($this);
+        $class = $this->option('class') ?: 'DatabaseSeeder';
+        $reflection = new ReflectionClass("App\\database\\seeds\\" . $class);
+        $class != 'DatabaseSeeder' ? $this->note[] = "<info>Seeding:</info> $class" : null;
+        $this->seeder = $reflection->newInstance();
+        return $this->seeder;
     }
 
     /**
@@ -76,9 +81,9 @@ class SeedCommand extends GeneratorCommand
      */
     protected function getDatabase()
     {
-        $database = $this->input->getOption('database');
+        $database = $this->option('database');
 
-        return $database ?: $this->laravel['config']['database.default'];
+        return $database ?: $this->resolver->getDefaultConnection();
     }
 
     /**

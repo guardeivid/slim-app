@@ -68,7 +68,7 @@ class SeederMakeCommand extends GeneratorCommand
      */
     protected function getPath($name)
     {
-        return ROOT_PATH.'/database/seeds/'.$name.'.php';
+        return APP_PATH.'/database/seeds/'.$name.'.php';
     }
 
     /**

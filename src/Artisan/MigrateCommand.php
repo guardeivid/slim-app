@@ -79,14 +79,11 @@ class MigrateCommand extends GeneratorCommand
             ]
         );
 
-        var_dump($migrations);
-        var_dump($this->migrator->getNotes());
-
         // Finally, if the "seed" option has been given, we will re-run the database
         // seed task to re-populate the database, which is convenient when adding
         // a migration and a seed at the same time, as it is only this command.
         if ($this->option('seed') && ! $this->option('pretend')) {
-            //$this->call('db:seed', ['--force' => true]);
+            $this->call('db:seed', ['force' => true, 'class' => $this->option('class')]);
         }
     }
 
@@ -97,12 +94,11 @@ class MigrateCommand extends GeneratorCommand
      */
     protected function prepareDatabase()
     {
-        //$this->migrator->setConnection($this->option('database'));
+        $this->migrator->setConnection($this->option('database'));
 
         if (! $this->migrator->repositoryExists()) {
-            $repository = $this->migrator->getRepository();
-            $repository->createRepository();
-            $this->info[] = 'Migration table created successfully.';
+            $this->call('migrate:install', ['database' => $this->option('database')]);
         }
     }
+
 }

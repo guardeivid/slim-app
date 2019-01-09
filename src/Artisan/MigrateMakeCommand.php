@@ -46,7 +46,7 @@ class MigrateMakeCommand extends GeneratorCommand
     /**
      * Create a new migration install command instance.
      *
-     * @param  \Illuminate\Database\Migrations\MigrationCreator  
+     * @param  \Illuminate\Database\Migrations\MigrationCreator
      * @return void
      */
     public function __construct(MigrationCreator $creator, Filesystem $files, $options)
@@ -126,7 +126,7 @@ class MigrateMakeCommand extends GeneratorCommand
         }
 
         //Get the path to the migration directory.
-        return ROOT_PATH.'database'.DIRECTORY_SEPARATOR.'migrations';
+        return APP_PATH.'database'.DIRECTORY_SEPARATOR.'migrations';
     }
 
     /**

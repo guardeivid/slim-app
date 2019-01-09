@@ -141,9 +141,12 @@ class ArtisanController extends Controller
         $this->initMigrate();
 
         $a = new MigrateCommand($this->migrator, $this->resolver, [
+            //"pretend" => true,
+            "seed"  => true,
+            //"class" => "PostTableSeeder",
         ]);
 
-        return $response->withJson(['info'  => $a->info, 'error' => $a->error]);
+        return $response->withJson(['notes'  => $a->getNotes()]);
     }
 
     /**

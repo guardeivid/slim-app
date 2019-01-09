@@ -8,6 +8,7 @@ use SlimApp\Artisan\ControllerMakeCommand;
 use SlimApp\Artisan\MigrationCreator;
 use SlimApp\Artisan\MigrateMakeCommand;
 use SlimApp\Artisan\ModelMakeCommand;
+use SlimApp\Artisan\InstallCommand;
 use SlimApp\Artisan\SeedCommand;
 
 /*abstract */class GeneratorCommand
@@ -28,6 +29,7 @@ use SlimApp\Artisan\SeedCommand;
 
     public $info = [];
     public $error = [];
+    public $note = [];
 
     protected $path;
 
@@ -281,6 +283,8 @@ use SlimApp\Artisan\SeedCommand;
             $a = new ModelMakeCommand($this->files, $options);
         } elseif ($command == 'make:factory') {
             //$a = new FactoryMakeCommand($this->files, $options);
+        } elseif ($command == 'migrate:install') {
+            $a = new InstallCommand($this->migrator->getRepository(), $this->files, $options);
         } elseif ($command == 'db:seed') {
             $a = new SeedCommand($this->resolver, $options);
         }
@@ -293,6 +297,11 @@ use SlimApp\Artisan\SeedCommand;
             if ($a->error) {
                 $this->error[] = $a->error[0];
             }
+
+            if ($a->note) {
+                $this->note[] = $a->note[0];
+            }
+
         }
     }
 
@@ -334,7 +343,14 @@ use SlimApp\Artisan\SeedCommand;
      */
     protected function getMigrationPath()
     {
-        return ROOT_PATH.'database'.DIRECTORY_SEPARATOR.'migrations';
+        return APP_PATH.'database'.DIRECTORY_SEPARATOR.'migrations';
+    }
+
+
+    public function getNotes()
+    {
+        $notes = array_merge($this->migrator->getNotes(), $this->note);
+        return preg_replace('/<fg=red>(.*)<\/>/m', '<error>$1</error>', $notes);
     }
 
 }
