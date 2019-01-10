@@ -63,7 +63,7 @@ class InstallCommand extends GeneratorCommand
     protected function getOptions()
     {
         return [
-            ['database', null, InputOption::VALUE_OPTIONAL, 'The database connection to use.'],
+            ['database', null, 'The database connection to use.'],
         ];
     }
 }

@@ -1,6 +1,8 @@
 <?php
 
-use Illuminate\Database\Seeder;
+namespace App\database\seeds;
+
+use SlimApp\Artisan\Seeder;
 
 class DummyClass extends Seeder
 {

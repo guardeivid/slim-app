@@ -68,8 +68,10 @@ class SeedCommand extends GeneratorCommand
     protected function getSeeder()
     {
         $class = $this->option('class') ?: 'DatabaseSeeder';
-        $reflection = new ReflectionClass("App\\database\\seeds\\" . $class);
         $class != 'DatabaseSeeder' ? $this->note[] = "<info>Seeding:</info> $class" : null;
+
+        $reflection = new ReflectionClass("App\\database\\seeds\\" . $class);
+
         $this->seeder = $reflection->newInstance();
         return $this->seeder;
     }
@@ -94,11 +96,11 @@ class SeedCommand extends GeneratorCommand
     protected function getOptions()
     {
         return [
-            ['class', null, InputOption::VALUE_OPTIONAL, 'The class name of the root seeder', 'DatabaseSeeder'],
+            ['class', null, 'The class name of the root seeder', 'DatabaseSeeder'],
 
-            ['database', null, InputOption::VALUE_OPTIONAL, 'The database connection to seed'],
+            ['database', null, 'The database connection to seed'],
 
-            ['force', null, InputOption::VALUE_NONE, 'Force the operation to run when in production'],
+            ['force', null, 'Force the operation to run when in production'],
         ];
     }
 }

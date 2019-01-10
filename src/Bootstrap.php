@@ -175,13 +175,14 @@ class Bootstrap
     public function bootArtisan($artisan)
     {
         if ($artisan['enable']) {
-            $this->container['migration_table'] = isset($artisan['migration-table']) ? $artisan['migration-table'] : 'migrations';
+            $this->container['migration_table'] = isset($artisan['migration-table']) ?: 'migrations';
 
             //Routes
             $this->app->group('/artisan', function() {
 
                 $this->get('', Art::class . ':index')->setName('artisan');
                 $this->get('/models', Art::class . ':getModels');
+                $this->get('/seeds', Art::class . ':getSeeders');
 
                 $this->group('/make', function() {
                     $this->post('/auth', Art::class . ':makeAuth');
@@ -191,6 +192,18 @@ class Bootstrap
                     $this->post('/model', Art::class . ':makeModel');
                     $this->post('/seeder', Art::class . ':makeSeeder');
                 });
+
+                $this->group('migrate', function() {
+                    $this->post('install', Art::class . ':install');
+                    $this->post('/migrate', Art::class . ':migrate');
+                    $this->post('/rollback', Art::class . ':rollback');
+                    $this->post('/reset', Art::class . ':reset');
+                    $this->post('/refresh', Art::class . ':refresh');
+                    $this->post('/fresh', Art::class . ':fresh');
+                });
+
+                $this->post('db/seed', Art::class . ':seed');
+
             })->add(new \App\Middleware\LocalHostMiddleware($this->container));
         }
     }

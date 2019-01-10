@@ -9,6 +9,9 @@ use SlimApp\Artisan\MigrationCreator;
 use SlimApp\Artisan\MigrateMakeCommand;
 use SlimApp\Artisan\ModelMakeCommand;
 use SlimApp\Artisan\InstallCommand;
+use SlimApp\Artisan\MigrateCommand;
+use SlimApp\Artisan\RollbackCommand;
+use SlimApp\Artisan\ResetCommand;
 use SlimApp\Artisan\SeedCommand;
 
 /*abstract */class GeneratorCommand
@@ -283,8 +286,14 @@ use SlimApp\Artisan\SeedCommand;
             $a = new ModelMakeCommand($this->files, $options);
         } elseif ($command == 'make:factory') {
             //$a = new FactoryMakeCommand($this->files, $options);
+        } elseif ($command == 'migrate') {
+            $a = new MigrateCommand($this->migrator, $this->resolver, $options);
         } elseif ($command == 'migrate:install') {
-            $a = new InstallCommand($this->migrator->getRepository(), $this->files, $options);
+            $a = new InstallCommand($this->migrator->getRepository(), $options);
+        } elseif ($command == 'migrate:rollback') {
+            $a = new RollbackCommand($this->migrator, $options);
+        } elseif ($command == 'migrate:reset') {
+            $a = new ResetCommand($this->migrator, $options);
         } elseif ($command == 'db:seed') {
             $a = new SeedCommand($this->resolver, $options);
         }
@@ -301,10 +310,8 @@ use SlimApp\Artisan\SeedCommand;
             if ($a->note) {
                 $this->note[] = $a->note[0];
             }
-
         }
     }
-
 
     /**
      * Get all of the migration paths.
@@ -327,6 +334,7 @@ use SlimApp\Artisan\SeedCommand;
             $this->migrator->paths(), [$this->getMigrationPath()]
         );
     }
+
     /**
      * Determine if the given path(s) are pre-resolved "real" paths.
      *
@@ -336,6 +344,7 @@ use SlimApp\Artisan\SeedCommand;
     {
         return $this->hasOption('realpath') && $this->option('realpath');
     }
+
     /**
      * Get the path to the migration directory.
      *
@@ -346,10 +355,9 @@ use SlimApp\Artisan\SeedCommand;
         return APP_PATH.'database'.DIRECTORY_SEPARATOR.'migrations';
     }
 
-
     public function getNotes()
     {
-        $notes = array_merge($this->migrator->getNotes(), $this->note);
+        $notes = array_merge($this->note, $this->migrator->getNotes());
         return preg_replace('/<fg=red>(.*)<\/>/m', '<error>$1</error>', $notes);
     }
 

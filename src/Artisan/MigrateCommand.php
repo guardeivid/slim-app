@@ -79,6 +79,9 @@ class MigrateCommand extends GeneratorCommand
             ]
         );
 
+        $this->note = $this->getNotes();
+
+
         // Finally, if the "seed" option has been given, we will re-run the database
         // seed task to re-populate the database, which is convenient when adding
         // a migration and a seed at the same time, as it is only this command.

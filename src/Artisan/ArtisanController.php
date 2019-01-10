@@ -11,7 +11,13 @@ use SlimApp\Artisan\MiddlewareMakeCommand;
 use SlimApp\Artisan\MigrationCreator;
 use SlimApp\Artisan\MigrateMakeCommand;
 use SlimApp\Artisan\ModelMakeCommand;
-use SlimApp\Artisan\SeederMakeCommand;
+use SlimApp\Artisan\InstallCommand;
+use SlimApp\Artisan\MigrateCommand;
+use SlimApp\Artisan\RollbackCommand;
+use SlimApp\Artisan\ResetCommand;
+use SlimApp\Artisan\RefreshCommand;
+use SlimApp\Artisan\FreshCommand;
+use SlimApp\Artisan\SeedCommand;
 
 class ArtisanController extends Controller
 {
@@ -122,16 +128,40 @@ class ArtisanController extends Controller
         echo "makeAuth";
     }
 
-    public function getModels($request, $response)
+    protected function getFiles($path)
     {
         $files = [];
-        foreach (glob(APP_PATH . "Models/*.php") as $file) {
+        foreach (glob($path) as $file) {
             $files[] = basename($file, '.php');
         }
 
-        return $response->withJson($files);
+        return $files;
     }
 
+    public function getModels($request, $response)
+    {
+        return $response->withJson($this->getFiles(APP_PATH . "Models/*.php"));
+    }
+
+    public function getSeeders($request, $response)
+    {
+        return $response->withJson($this->getFiles(APP_PATH . "database/seeds/*.php"));
+    }
+
+
+    /**
+     * .
+     */
+    public function install($request, $response)
+    {
+        $this->initMigrate();
+
+        $a = new InstallCommand($this->repository, [
+            'database'  => Input::post('database') ?: 'default',
+        ]);
+
+        return $response->withJson(['notes'  => $a->note]);
+    }
 
     /**
      * .
@@ -141,13 +171,117 @@ class ArtisanController extends Controller
         $this->initMigrate();
 
         $a = new MigrateCommand($this->migrator, $this->resolver, [
-            //"pretend" => true,
-            "seed"  => true,
-            //"class" => "PostTableSeeder",
+            'database'  => Input::post('database')  ?: 'default',
+            'pretend'   => Input::post('pretend')   ?: false,
+            'seed'      => Input::post('seed')      ?: false,
+            'step'      => Input::post('step')      ?: false,
+            'force'     => Input::post('force')     ?: false,
+            'class'     => Input::post('clase')     ?: 'DatabaseSeeder',
         ]);
 
-        return $response->withJson(['notes'  => $a->getNotes()]);
+        return $response->withJson(['notes'  => $a->note]);
     }
+
+    /**
+     * .
+     */
+    public function rollback($request, $response)
+    {
+        $this->initMigrate();
+
+        $a = new RollbackCommand($this->migrator, [
+            'database'  => Input::post('database')  ?: 'default',
+            'pretend'   => Input::post('pretend')   ?: false,
+            'step'      => (int) Input::post('step'),
+            'force'     => Input::post('force')     ?: false,
+            'path'      => false, //The path of migrations files to be executed
+        ]);
+
+        return $response->withJson(['notes'  => $a->note]);
+    }
+
+    /**
+     * .
+     */
+    public function reset($request, $response)
+    {
+        $this->initMigrate();
+
+        $a = new ResetCommand($this->migrator, [
+            'database'  => Input::post('database') ?: 'default',
+            'pretend'   => Input::post('pretend') ?: false,
+            'force'     => Input::post('force') ?: false,
+            'path'      => false, //The path of migrations files to be executed
+        ]);
+
+        return $response->withJson(['notes'  => $a->note]);
+    }
+
+    /**
+     * .
+     */
+    public function refresh($request, $response)
+    {
+        $this->initMigrate();
+
+        $a = new RefreshCommand($this->migrator, $this->resolver, [
+            'database'  => Input::post('database') ?: 'default',
+            'force'     => Input::post('force') ?: false,
+            'path'      => false, //The path of migrations files to be executed
+            'seed'      => Input::post('seed') ?: false,
+            'seeder'    => Input::post('seeder') ?: 'DatabaseSeeder',
+            'step'      => (int) Input::post('step'),
+        ]);
+
+        return $response->withJson(['notes'  => $a->note]);
+    }
+
+    /**
+     * .
+     */
+    public function fresh($request, $response)
+    {
+        //(Illuminate/Database/Schema/PostgresBuilder.php)
+        //Version illuminate\database >= 5.5 dropAllTables
+        //Version illuminate\database >= 5.6 dropAllViews
+        //
+        $version = $this->getVersion();
+
+        if ($version >= 5.6) {
+            $this->initMigrate();
+
+            $a = new FreshCommand($this->migrator, $this->resolver, [
+                'database'      => Input::post('database') ?: 'default',
+                'drop-views'    => Input::post('drop-views') ?: false,
+                'force'         => Input::post('force') ?: false,
+                'path'          => false, //The path of migrations files to be executed
+                'seed'          => Input::post('seed') ?: false,
+                'seeder'        => Input::post('seeder') ?: 'DatabaseSeeder',
+                'step'          => (int) Input::post('step'),
+            ]);
+        } else {
+            return $response->withJson(['notes'  => ['Command not support in version {$version} installed of illuminate\\database']]);
+        }
+
+        return $response->withJson(['notes'  => $a->note]);
+    }
+
+    /**
+     * .
+     */
+    public function seed($request, $response)
+    {
+        $this->initMigrate();
+
+        $a = new SeedCommand($this->resolver, [
+            'database'  => Input::post('database') ?: 'default',
+            'class'     => Input::post('class') ?: 'DatabaseSeeder',
+            'force'     => Input::post('force') ?: false,
+        ]);
+
+        return $response->withJson(['notes'  => $a->note]);
+    }
+
 
     /**
      * Init migrate
@@ -170,6 +304,18 @@ class ArtisanController extends Controller
             $this->resolver,
             $this->file
         );
+    }
+
+    protected function getVersion()
+    {
+        $data = [];
+        $packages = json_decode(file_get_contents(ROOT_PATH.'vendor/composer/installed.json'), true);
+
+        foreach ($packages as $package) {
+            $data[$package['name']] = $package['version_normalized'];
+        }
+
+        return (float) $data['illuminate/database'];
     }
 
 }
