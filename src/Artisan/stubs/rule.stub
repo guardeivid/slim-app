@@ -1,0 +1,17 @@
+<?php
+
+namespace DummyNamespace;
+
+use Respect\Validation\Rules\AbstractRule;
+
+class DummyClass extends AbstractRule
+{
+    /**
+     * Validate a new rule.
+     *
+     */
+    public function validate($input)
+    {
+        //
+    }
+}

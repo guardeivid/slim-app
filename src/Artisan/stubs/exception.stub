@@ -1,0 +1,17 @@
+<?php
+
+namespace DummyNamespace;
+
+use Respect\Validation\Exceptions\ValidationException;
+
+class DummyClass extends ValidationException
+{
+    public static $defaultTemplates = [
+        self::MODE_DEFAULT => [
+            self::STANDARD => '',
+        ],
+        self::MODE_NEGATIVE => [
+            self::STANDARD => '',
+        ],
+    ];
+}

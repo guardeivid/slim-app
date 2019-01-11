@@ -189,6 +189,7 @@ class Bootstrap
                     $this->post('/controller', Art::class . ':makeController');
                     $this->post('/middleware', Art::class . ':makeMiddleware');
                     $this->post('/migration', Art::class . ':makeMigration');
+                    $this->post('/validation', Art::class . ':makeValidation');
                     $this->post('/model', Art::class . ':makeModel');
                     $this->post('/seeder', Art::class . ':makeSeeder');
                 });

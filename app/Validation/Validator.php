@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Validation;
+
 use Respect\Validation\Factory;
 use Respect\Validation\Validator as Respect;
 use Respect\Validation\Exceptions\NestedValidationException;
@@ -21,7 +22,7 @@ class Validator
     {
         $this->translator = $translator;
     }
-    
+
     public function validate($request, array $rules)
     {
         foreach ($rules as $field => $rule) {

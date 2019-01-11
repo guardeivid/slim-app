@@ -8,6 +8,7 @@ use SlimApp\Artisan\ControllerMakeCommand;
 use SlimApp\Artisan\MigrationCreator;
 use SlimApp\Artisan\MigrateMakeCommand;
 use SlimApp\Artisan\ModelMakeCommand;
+use SlimApp\Artisan\ExceptionMakeCommand;
 use SlimApp\Artisan\InstallCommand;
 use SlimApp\Artisan\MigrateCommand;
 use SlimApp\Artisan\RollbackCommand;
@@ -278,14 +279,19 @@ use SlimApp\Artisan\SeedCommand;
     {
         $a = [];
 
+            //MAKE
         if ($command == 'make:controller') {
             $a = new ControllerMakeCommand($this->files, $options);
         } elseif ($command == 'make:migration') {
             $a = new MigrateMakeCommand(new MigrationCreator($this->files), $this->files, $options);
         } elseif ($command == 'make:model') {
             $a = new ModelMakeCommand($this->files, $options);
+        } elseif ($command == 'make:exception') {
+            $a = new ExceptionMakeCommand($this->files, $options);
         } elseif ($command == 'make:factory') {
             //$a = new FactoryMakeCommand($this->files, $options);
+
+            //MIGRATE
         } elseif ($command == 'migrate') {
             $a = new MigrateCommand($this->migrator, $this->resolver, $options);
         } elseif ($command == 'migrate:install') {

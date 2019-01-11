@@ -11,6 +11,7 @@ use SlimApp\Artisan\MiddlewareMakeCommand;
 use SlimApp\Artisan\MigrationCreator;
 use SlimApp\Artisan\MigrateMakeCommand;
 use SlimApp\Artisan\ModelMakeCommand;
+use SlimApp\Artisan\RuleMakeCommand;
 use SlimApp\Artisan\InstallCommand;
 use SlimApp\Artisan\MigrateCommand;
 use SlimApp\Artisan\RollbackCommand;
@@ -111,6 +112,19 @@ class ArtisanController extends Controller
     }
 
     /**
+     * Create a new Rule and Exception class.
+     */
+    public function makeValidation($request, $response)
+    {
+        $a = new RuleMakeCommand($this->file, [
+            'name'      => Input::post('name'),
+            'force'     => Input::post('force'),
+        ]);
+
+        return $response->withJson(['info'  => $a->info, 'error' => $a->error]);
+    }
+
+    /**
      * Create a new seeder class.
      */
     public function makeSeeder($request, $response)
@@ -150,7 +164,7 @@ class ArtisanController extends Controller
 
 
     /**
-     * .
+     * Migrate:install
      */
     public function install($request, $response)
     {
@@ -164,7 +178,7 @@ class ArtisanController extends Controller
     }
 
     /**
-     * .
+     * Migrate migrate
      */
     public function migrate($request, $response)
     {
@@ -183,7 +197,7 @@ class ArtisanController extends Controller
     }
 
     /**
-     * .
+     * Migrate:rollback
      */
     public function rollback($request, $response)
     {
@@ -201,7 +215,7 @@ class ArtisanController extends Controller
     }
 
     /**
-     * .
+     * Migrate:reset
      */
     public function reset($request, $response)
     {
@@ -218,7 +232,7 @@ class ArtisanController extends Controller
     }
 
     /**
-     * .
+     * Migrate:refresh
      */
     public function refresh($request, $response)
     {
@@ -237,14 +251,14 @@ class ArtisanController extends Controller
     }
 
     /**
-     * .
+     * Migrate:fresh
      */
     public function fresh($request, $response)
     {
         //(Illuminate/Database/Schema/PostgresBuilder.php)
         //Version illuminate\database >= 5.5 dropAllTables
         //Version illuminate\database >= 5.6 dropAllViews
-        //
+
         $version = $this->getVersion();
 
         if ($version >= 5.6) {
@@ -267,7 +281,7 @@ class ArtisanController extends Controller
     }
 
     /**
-     * .
+     * Db:seed
      */
     public function seed($request, $response)
     {
