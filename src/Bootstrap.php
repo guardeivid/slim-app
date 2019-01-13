@@ -194,8 +194,8 @@ class Bootstrap
                     $this->post('/seeder', Art::class . ':makeSeeder');
                 });
 
-                $this->group('migrate', function() {
-                    $this->post('install', Art::class . ':install');
+                $this->group('/migrate', function() {
+                    $this->post('/install', Art::class . ':install');
                     $this->post('/migrate', Art::class . ':migrate');
                     $this->post('/rollback', Art::class . ':rollback');
                     $this->post('/reset', Art::class . ':reset');
@@ -203,7 +203,7 @@ class Bootstrap
                     $this->post('/fresh', Art::class . ':fresh');
                 });
 
-                $this->post('db/seed', Art::class . ':seed');
+                $this->post('/db/seed', Art::class . ':seed');
 
             })->add(new \App\Middleware\LocalHostMiddleware($this->container));
         }

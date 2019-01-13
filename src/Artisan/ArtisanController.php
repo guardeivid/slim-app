@@ -13,6 +13,7 @@ use SlimApp\Artisan\MigrateMakeCommand;
 use SlimApp\Artisan\ModelMakeCommand;
 use SlimApp\Artisan\RuleMakeCommand;
 use SlimApp\Artisan\InstallCommand;
+use SlimApp\Artisan\RouteListCommand;
 use SlimApp\Artisan\MigrateCommand;
 use SlimApp\Artisan\RollbackCommand;
 use SlimApp\Artisan\ResetCommand;
@@ -140,6 +141,27 @@ class ArtisanController extends Controller
     public function makeAuth($request, $response)
     {
         echo "makeAuth";
+    }
+
+    /**
+     * List all registered routes.
+     */
+    public function routeList($request, $response)
+    {
+        $sort = ['method, uri, name, action'];
+
+        $a = new RouteListCommand($this->router, [
+            'method' => Input::get('method') ?: false,
+            'name' => Input::get('name') ?: false,
+            'path' => Input::get('path') ?: false,
+            'reverse' => Input::get('reverse') ?: false,
+            'sort' => Input::get('reverse') ?: 'uri',
+        ]);
+
+        return $response->withJson([
+            'headers'  => $a->headers, 
+            'rows'  => $a->rows, 
+            'error' => $a->error]);
     }
 
     protected function getFiles($path)
