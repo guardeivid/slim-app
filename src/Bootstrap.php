@@ -175,7 +175,7 @@ class Bootstrap
     public function bootArtisan($artisan)
     {
         if ($artisan['enable']) {
-            $this->container['migration_table'] = isset($artisan['migration-table']) ?: 'migrations';
+            $this->container['migration_table'] = isset($artisan['migration-table']) ? $artisan['migration-table'] : 'migrations';
 
             //Routes
             $this->app->group('/artisan', function() {
@@ -183,6 +183,10 @@ class Bootstrap
                 $this->get('', Art::class . ':index')->setName('artisan');
                 $this->get('/models', Art::class . ':getModels');
                 $this->get('/seeds', Art::class . ':getSeeders');
+
+                $this->group('/route', function() {
+                    $this->post('/list', Art::class . ':routeList');
+                });
 
                 $this->group('/make', function() {
                     $this->post('/auth', Art::class . ':makeAuth');

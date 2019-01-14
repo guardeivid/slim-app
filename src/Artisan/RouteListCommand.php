@@ -5,6 +5,7 @@ namespace SlimApp\Artisan;
 use Closure;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use Illuminate\Support\Collection;
 use Slim\Route;
 use Slim\Router;
 use SlimApp\Artisan\GeneratorCommand;
@@ -68,12 +69,12 @@ class RouteListCommand extends GeneratorCommand
     public function handle()
     {
         if (count($this->routes) === 0) {
-            $this->error[] = "Your application doesn't have any routes.";
+            $this->note[] = "<error>Your application doesn't have any routes.</error>";
             return;
         }
 
         //$this->displayRoutes($this->getRoutes());
-        $this->routes = $this->getRoutes();
+        $this->note[] = $this->displayRoutes($this->getRoutes());
     }
 
     /**
@@ -86,7 +87,9 @@ class RouteListCommand extends GeneratorCommand
         //var_dump(collect($this->routes));
         //die();
 
-        $routes = collect($this->routes)->map(function ($route) {
+        $collect = new Collection($this->routes);
+
+        $routes = $collect->map(function ($route) {
             return $this->getRouteInformation($route);
         })->all();
 
@@ -113,14 +116,14 @@ class RouteListCommand extends GeneratorCommand
             'method' => implode('|', $route->getMethods()),
             'uri'    => $route->getPattern(),
             'name'   => $route->getName(),
-            //'action' => ltrim($this->getAction($route), '\\'),
+            'action' => $this->getAction($route),
         ]);
     }
 
     protected function getAction($route)
     {
         $action = $route->getCallable() instanceof Closure ? 'Closure' : $route->getCallable();
-        //var_dump($action);
+
         return $action;
     }
 
@@ -146,7 +149,24 @@ class RouteListCommand extends GeneratorCommand
      */
     protected function displayRoutes(array $routes)
     {
-        $this->table($this->headers, $routes);
+        $table = "<table class='table'><thead><tr>";
+
+        foreach ($this->headers as $header) {
+            $table .= "<th> $header </th>";
+        }
+
+        $table .= "</tr></thead><tbody>";
+
+        foreach ($routes as $route) {
+            $table .= "<tr><td>".$route['method']."</td>";
+            $table .= "<td>".$route['uri']."</td>";
+            $table .= "<td>".$route['name']."</td>";
+            $table .= "<td>".$route['action']."</td></tr>";
+        }
+
+        $table .= "</tbody></table>";
+
+        return $table;
     }
 
     /**

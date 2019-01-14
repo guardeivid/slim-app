@@ -151,17 +151,14 @@ class ArtisanController extends Controller
         $sort = ['method, uri, name, action'];
 
         $a = new RouteListCommand($this->router, [
-            'method' => Input::get('method') ?: false,
-            'name' => Input::get('name') ?: false,
-            'path' => Input::get('path') ?: false,
-            'reverse' => Input::get('reverse') ?: false,
-            'sort' => Input::get('reverse') ?: 'uri',
+            'method' => Input::post('method') ?: false,
+            'name' => Input::post('name') ?: false,
+            'path' => Input::post('path') ?: false,
+            'reverse' => Input::post('reverse') ?: false,
+            'sort' => Input::post('sort') ?: 'uri',
         ]);
 
-        return $response->withJson([
-            'headers'  => $a->headers, 
-            'rows'  => $a->rows, 
-            'error' => $a->error]);
+        return $response->withJson(['note' => $a->note]);
     }
 
     protected function getFiles($path)
