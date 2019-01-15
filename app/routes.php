@@ -95,4 +95,4 @@ $app->get('/', function ($request, $response) {
 });
 
 $app->get('/migrate', 'SlimApp\Artisan\ArtisanController:migrate');
-$app->get('/route', 'SlimApp\Artisan\ArtisanController:routeList');
+$app->post('/route', 'SlimApp\Artisan\ArtisanController:routeList');
