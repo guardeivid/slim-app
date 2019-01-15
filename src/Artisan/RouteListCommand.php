@@ -84,21 +84,23 @@ class RouteListCommand extends GeneratorCommand
      */
     protected function getRoutes()
     {
-        //var_dump(collect($this->routes));
-        //die();
 
         $collect = new Collection($this->routes);
 
         $routes = $collect->map(function ($route) {
             return $this->getRouteInformation($route);
         })->all();
+        //print_r($routes);
+        //die();
 
         if ($sort = $this->option('sort')) {
             $routes = $this->sortRoutes($sort, $routes);
+            //print_r($routes);
         }
 
         if ($this->option('reverse')) {
             $routes = array_reverse($routes);
+            //print_r($routes);
         }
 
         return array_filter($routes);
@@ -136,6 +138,7 @@ class RouteListCommand extends GeneratorCommand
      */
     protected function sortRoutes($sort, $routes)
     {
+
         return Arr::sort($routes, function ($route) use ($sort) {
             return $route[$sort];
         });
@@ -182,7 +185,6 @@ class RouteListCommand extends GeneratorCommand
              $this->option('method') && ! Str::contains($route['method'], strtoupper($this->option('method')))) {
             return;
         }
-
         return $route;
     }
 

@@ -184,9 +184,11 @@ class Bootstrap
                 $this->get('/models', Art::class . ':getModels');
                 $this->get('/seeds', Art::class . ':getSeeders');
 
-                $this->group('/route', function() {
+                /*$this->group('/route', function() {
                     $this->post('/list', Art::class . ':routeList');
-                });
+                });*/
+
+                $this->post('/route/list', Art::class . ':routeList');
 
                 $this->group('/make', function() {
                     $this->post('/auth', Art::class . ':makeAuth');

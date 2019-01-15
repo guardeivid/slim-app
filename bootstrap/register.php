@@ -10,5 +10,5 @@ $app->add(new \App\Middelware\OldInputMiddelware($container));
 $app->add(new \App\Middelware\CsrfViewMiddelware($container));
 
 // run the crsf check global
-$app->add($container->csrf);
+//$app->add($container->csrf);
 
