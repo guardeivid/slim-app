@@ -158,7 +158,7 @@ class ArtisanController extends Controller
             'sort' => Input::post('sort') ?: 'uri',
         ]);
 
-        return $response->withJson(['note' => $a->note]);
+        return $response->withJson(['notes' => $a->note]);
     }
 
     protected function getFiles($path)
@@ -189,11 +189,16 @@ class ArtisanController extends Controller
     {
         $this->initMigrate();
 
-        $a = new InstallCommand($this->repository, [
-            'database'  => Input::post('database') ?: 'default',
-        ]);
+        try {
+            $a = new InstallCommand($this->repository, [
+                'database'  => Input::post('database') ?: 'default',
+            ]);
 
-        return $response->withJson(['notes'  => $a->note]);
+            return $response->withJson(['notes'  => $a->note]);
+        } catch (Exception $e) {
+            return $response->withJson(['notes'  => "<critical>".$e->getMessage()."</critical>"]);
+        }
+        
     }
 
     /**

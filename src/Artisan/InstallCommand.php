@@ -50,9 +50,16 @@ class InstallCommand extends GeneratorCommand
     {
         $this->repository->setSource($this->option('database'));
 
-        $this->repository->createRepository();
+        if (!$this->repository->repositoryExists()) {
+            $this->repository->createRepository();
 
-        $this->note[] = '<info>Migration table created successfully.</info>';
+            $this->note[] = '<info>Migration table created successfully.</info>';
+        } else {
+            $this->note[] = '<error>Migration table already exists.</error>';
+        }
+        
+
+        
     }
 
     /**
