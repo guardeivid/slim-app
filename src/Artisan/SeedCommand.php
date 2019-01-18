@@ -54,10 +54,15 @@ class SeedCommand extends GeneratorCommand
     {
         $this->resolver->setDefaultConnection($this->getDatabase());
 
-        Model::unguarded(function () {
-            $this->getSeeder()->__invoke();
-            $this->note = array_merge($this->note, $this->seeder->getNotes());
-        });
+        try {
+            Model::unguarded(function () {
+                $this->getSeeder()->__invoke();
+                $this->note = array_merge($this->note, $this->seeder->getNotes());
+            });
+        }
+        catch (\Exception $e) {
+            $this->note[] = "<critical>".$e->getMessage()."</critical>";
+        }
     }
 
     /**

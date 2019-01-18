@@ -49,15 +49,20 @@ class FreshCommand extends GeneratorCommand
 
         $database = $this->option('database');
 
-        if ($this->option('drop-views')) {
-            $this->dropAllViews($database);
+        try {
+            if ($this->option('drop-views')) {
+                $this->dropAllViews($database);
 
-            $this->note[] = '<info>Dropped all views successfully.</info>';
+                $this->note[] = '<info>Dropped all views successfully.</info>';
+            }
+
+            $this->dropAllTables($database);
+
+            $this->note[] = '<info>Dropped all tables successfully.</info>';
         }
-
-        $this->dropAllTables($database);
-
-        $this->note[] = '<info>Dropped all tables successfully.</info>';
+        catch (\Exception $e) {
+            $this->note[] = "<critical>".$e->getMessage()."</critical>";
+        }
 
         $this->call('migrate', array_filter([
             'database' => $database,

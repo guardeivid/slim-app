@@ -298,7 +298,7 @@ class ArtisanController extends Controller
                 'step'          => (int) Input::post('step'),
             ]);
         } else {
-            return $response->withJson(['notes'  => ['Command not support in version {$version} installed of illuminate\\database']]);
+            return $response->withJson(['notes'  => ['Command not support in version '.$version.' installed of illuminate\\database']]);
         }
 
         return $response->withJson(['notes'  => $a->note]);

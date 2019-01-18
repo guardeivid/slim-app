@@ -52,12 +52,17 @@ class RollbackCommand extends GeneratorCommand
 
         $this->migrator->setConnection($this->option('database'));
 
-        $this->migrator->rollback(
-            $this->getMigrationPaths(), [
-                'pretend' => $this->option('pretend'),
-                'step' => (int) $this->option('step'),
-            ]
-        );
+        try {
+            $this->migrator->rollback(
+                $this->getMigrationPaths(), [
+                    'pretend' => $this->option('pretend'),
+                    'step' => (int) $this->option('step'),
+                ]
+            );
+        }
+        catch (\Exception $e) {
+            $this->note[] = "<critical>".$e->getMessage()."</critical>";
+        }
 
         // Once the migrator has run we will grab the note output and send it out to
         // the console screen, since the migrator itself functions without having
