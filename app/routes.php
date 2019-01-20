@@ -96,3 +96,21 @@ $app->get('/', function ($request, $response) {
 
 $app->get('/migrate', 'SlimApp\Artisan\ArtisanController:migrate');
 $app->post('/route', 'SlimApp\Artisan\ArtisanController:routeList');
+
+$app->get('/a', function ($request, $response) {
+    //$this->container->db;
+    $connection = \DB::connection();
+    //$connection->useDefaultSchemaGrammar();
+    //$grammar = $connection->getSchemaGrammar();
+    //print_r($connection);
+    //return App\Models\CentroPoblado::first()->toJson();
+    
+
+    $table = "partidos";
+    //$table = $connection->getTablePrefix().$table;
+    //$results = $connection->select($grammar->compileColumnListing($table));
+
+    $results = \DB::schema()->getColumnListing($table);
+
+    print_r($results);
+});

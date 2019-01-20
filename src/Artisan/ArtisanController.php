@@ -107,6 +107,11 @@ class ArtisanController extends Controller
             'resource'  => Input::post('resource'),
             'pivot'     => Input::post('pivot'),
             'force'     => Input::post('force'),
+
+            'plain'     => Input::post('plain'),
+            'soft'      => Input::post('soft'),
+            'table'     => Input::post('table'),
+            'table'     => Input::post('table'),
         ]);
 
         return $response->withJson(['info'  => $a->info, 'error' => $a->error]);

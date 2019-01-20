@@ -3,61 +3,8 @@
 namespace DummyNamespace;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 class DummyClass extends Model
 {
-    use SoftDeletes;
-
-    /**
-     * Table Names
-     */
-    protected $table = DummyTable;              //snake_plural
-
-    /**
-     * Primary Keys
-     */
-    protected $primaryKey = DummyPrimaryKey;    //'id'
-
-    public $incrementing = DummyIncrementing;   //true
-
-    protected $keyType = DummyKeyType;          //'int'
-
-    /**
-     * Timestamps
-     */
-    public $timestamps = DummyTimestamps;       //true
-
-    const CREATED_AT = DummyCreatedAt;          //'created_at'
-
-    const UPDATED_AT = DummyUpdatedAt;          //'updated_at'
-
-    /**
-     * Database Connection
-     */
-    protected $connection = DummyConnection;    //default
-
-    /**
-     * Default Attribute Values
-     */
-    protected $attributes = DummyAttributes;    //[]
-
-    /**
-     * Mass Assignment
-     */
-    protected $fillable = DummyFillable;        //[]
-
-    protected $guarded = DummyGuarded;          //['*']
-
-    /**
-     * Date Mutators
-     */
-    protected $dates = DummyDates;              //['created_at', 'updated_at']
-
-    /**
-     * Hiding Attributes From JSON
-     */
-    protected $hidden = DummyHidden;            //[]
-
-    protected $visible = DummyVisible;          //[]
+    DummyPropsModel
 }

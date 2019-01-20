@@ -29,6 +29,13 @@ class ModelMakeCommand extends GeneratorCommand
     protected $type = 'Model';
 
     /**
+     * The excluded columns for fillable.
+     *
+     * @var array
+     */
+    protected $exclude = ['id', 'gid', 'password', 'created_at', 'updated_at', 'deleted_at'];
+
+    /**
      * Execute the console command.
      *
      * @return void
@@ -57,6 +64,144 @@ class ModelMakeCommand extends GeneratorCommand
         if ($this->option('controller') || $this->option('resource')) {
             $this->createController();
         }
+    }
+
+    /**
+     * Build the class with the given name.
+     *
+     * @param  string  $name
+     * @return string
+     * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
+     */
+    protected function buildClass($name)
+    {
+        $stub = $this->files->get($this->getStub());
+
+        return $this->replaceNamespace($stub, $name)->replacePropsModel($stub)->replaceClass($stub, $name);
+    }
+
+    /**
+     * Replace the props of the model for the given stub.
+     *
+     * @param  string  $stub
+     * @return $this
+     */
+    protected function replacePropsModel(&$stub)
+    {
+        $props = [];
+
+        $table = $this->option('table') ?: str_plural(strtolower($this->getNameInput()));
+
+        if ($this->option('table')) {
+            $props[] = $this->addPropTable($this->option('table'));
+        }
+
+        $primarykey = isset($this->option('primarykey')) and $this->option('primarykey') != 'id' ? $this->option('primarykey') : false;
+        $incrementing = isset($this->option('incrementing')) and $this->option('incrementing') == false ? false : true;
+        $keytype = isset($this->option('keytype')) and $this->option('keytype') != 'int' ? $this->option('keytype') : false;
+
+        if ($primarykey or !$incrementing or $keytype) {
+            $props[] = $this->addPropPrimaryKey($primarykey, $incrementing, $keytype);
+        }
+
+        $timestamps = isset($this->option('timestamps')) and $this->option('timestamps') == false ? false : true;
+        $created_at = isset($this->option('created_at')) and $this->option('keytype') != 'created_at' ? $this->option('created_at') : false;
+        $updated_at = isset($this->option('updated_at')) and $this->option('updated_at') != 'updated_at' ? $this->option('updated_at') : false;
+
+        if (!$timestamps or $created_at or $updated_at) {
+            $props[] = $this->addPropTimestamp($timestamps, $created_at, $updated_at);
+        }
+
+        if ($this->option('autofill')) {
+            $props[] = $this->addPropAutoFill($table);
+        } else {
+            $fillable = isset($this->option('fillable')) ? $this->option('fillable') : false;
+            $guarded = isset($this->option('guarded')) and $this->option('guarded') != '*' ? $this->option('guarded') : false;
+            $guarded = $fillable ? false : $guarded;
+
+            if ($fillable or $guarded != false) {
+                $props[] = $this->addPropMassAssignment($fillable, $guarded);
+            }
+        }
+
+        $stub = str_replace('DummyPropsModel', $props), $stub);
+
+        return $this;
+    }
+
+    protected function addPropTable($table)
+    {
+        
+        return "    /** Table Name */
+    protected \$table = '$table';";
+    }
+
+    protected function addPropPrimaryKey($primaryKey, $incrementing, $keyType)
+    {
+        $prop = '    /** Primary Key */';
+        if ($primaryKey) {
+            $prop .= "\n    protected \$primaryKey = '$primaryKey';"
+        }
+
+        if (!$incrementing) {
+            $prop .= "\n    public \$incrementing = false;"
+        }
+
+        if ($keyType) {
+            $prop .= "\n    protected \$keyType = '$keyType';"
+        }
+
+        return $prop;
+    }
+
+    protected function addPropTimestamp($timestamps, $created_at, $updated_at)
+    {
+        $prop = '    /** Timestamps */';
+        if (!$timestamps) {
+            $prop .= "\n    public \$timestamps = false;"
+        }
+
+        if ($created_at) {
+            $prop .= "\n    const CREATED_AT = '$created_at';"
+        }
+
+        if ($updated_at) {
+            $prop .= "\n    const UPDATED_AT = '$updated_at';"
+        }
+
+        return $prop;
+    }
+
+    protected function addPropAutoFill($table)
+    {
+        // Get the table columns
+        $columns = \DB::schema()->getColumnListing($table);
+        // Exclude the unwanted columns 
+        $columns = array_filter($columns, function($value) {
+          return !in_array($value, $this->exclude);
+        });
+        // Add quotes
+        array_walk($columns, function(&amp;$value) {
+            $value = "'" . $value . "'";
+        });
+        // CSV format
+        $columns = implode(',', $columns);
+
+        return "[$columns]";
+    }
+
+    protected function addPropMassAssignment($fillable, $guarded)
+    {
+        $prop = '    /** Mass Assignment */';
+        if (!$timestamps) {
+            $prop .= "\n    protected \$fillable = [$fillable];"
+        }
+
+        if ($created_at) {
+            $prop .= "\n    protected \$guarded = [$guarded];"
+        }
+
+        return $prop;
     }
 
     /**
@@ -119,11 +264,19 @@ class ModelMakeCommand extends GeneratorCommand
      */
     protected function getStub()
     {
-        if ($this->option('pivot')) {
-            return __DIR__.'/stubs/pivot.model.stub';
+        $stub = null;
+
+        if ($this->option('plain')) {
+            $stub = $this->option('pivot') ? '/stubs/pivot.model.plain.stub' : '/stubs/model.plain.stub';
+        } else {
+            if ($this->option('soft')) {
+                $stub = $this->option('pivot') ? '/stubs/pivot.model.soft.stub' : '/stubs/model.soft.stub';
+            } else {
+                $stub = $this->option('pivot') ? '/stubs/pivot.model.stub' : '/stubs/model.stub';
+            }
         }
 
-        return __DIR__.'/stubs/model.stub';
+        return __DIR__.$stub;
     }
 
     /**
@@ -158,6 +311,65 @@ class ModelMakeCommand extends GeneratorCommand
             ['pivot', 'p', 'Indicates if the generated model should be a custom intermediate table model'],
 
             ['resource', 'r', 'Indicates if the generated controller should be a resource controller'],
+
+            ['plain', 'p', 'Indicates if the generated model should be a custom empty class'],
+
+            ['soft', 'p', 'Indicates if the generated model use soft deletes'],
+
+            ['table', null, 'Table name of the model'],
+
+            ['primarykey', null, 'Primary Key of the model'],
+
+            ['incrementing', null, 'Indicates if the primary key is auto-incrementing'],
+
+            ['keytype', null, 'Indicates if the key type of the is int or string'],
+
+            ['timestamps', null, 'Indicates if the model have fields created_at and updated_at'],
+
+            ['created_at', null, 'Indicates if the name of created_at field'],
+
+            ['updated_at', null, 'Indicates if the name of updated_at field'],
+
+            ['autofill', null, 'Indicates if the fields fillable have create automatic'],
+
+            ['fillable', null, ''],
+
+            ['guarded', null, ''],
+
         ];
     }
 }
+
+
+/*
+    // Table Names 
+    protected $table = DummyTable;              //snake_plural
+
+    // Primary Keys 
+    protected $primaryKey = DummyPrimaryKey;    //'id'
+    public $incrementing = DummyIncrementing;   //true
+    protected $keyType = DummyKeyType;          //'int'
+
+    // Timestamps 
+    public $timestamps = DummyTimestamps;       //true
+    const CREATED_AT = DummyCreatedAt;          //'created_at'
+    const UPDATED_AT = DummyUpdatedAt;          //'updated_at'
+
+    // Database Connection 
+    protected $connection = DummyConnection;    //default
+
+    // Default Attribute Values 
+    protected $attributes = DummyAttributes;    //[]
+
+    // Mass Assignment 
+    protected $fillable = DummyFillable;        //[]
+    protected $guarded = DummyGuarded;          //['*']
+
+    // Date Mutators 
+    protected $dates = DummyDates;              //['created_at', 'updated_at']
+
+    // Hiding Attributes From JSON 
+    protected $hidden = DummyHidden;            //[]
+    protected $visible = DummyVisible;          //[]
+
+*/
