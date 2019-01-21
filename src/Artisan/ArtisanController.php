@@ -111,7 +111,15 @@ class ArtisanController extends Controller
             'plain'     => Input::post('plain'),
             'soft'      => Input::post('soft'),
             'table'     => Input::post('table'),
-            'table'     => Input::post('table'),
+            'primarykey'=> Input::post('primarykey'),
+            'incrementing'=> Input::post('incrementing'),
+            'keytype'   => Input::post('keytype'),
+            'timestamps'=> Input::post('timestamps'),
+            'created_at'=> Input::post('created_at'),
+            'updated_at'=> Input::post('updated_at'),
+            'autofill'  => Input::post('autofill'),
+            'fillable'  => Input::post('fillable'),
+            'guarded'   => Input::post('guarded'),
         ]);
 
         return $response->withJson(['info'  => $a->info, 'error' => $a->error]);
@@ -203,7 +211,7 @@ class ArtisanController extends Controller
         } catch (Exception $e) {
             return $response->withJson(['notes'  => "<critical>".$e->getMessage()."</critical>"]);
         }
-        
+
     }
 
     /**

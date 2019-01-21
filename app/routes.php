@@ -104,7 +104,7 @@ $app->get('/a', function ($request, $response) {
     //$grammar = $connection->getSchemaGrammar();
     //print_r($connection);
     //return App\Models\CentroPoblado::first()->toJson();
-    
+
 
     $table = "partidos";
     //$table = $connection->getTablePrefix().$table;
@@ -114,3 +114,46 @@ $app->get('/a', function ($request, $response) {
 
     print_r($results);
 });
+
+$app->get('/b', function ($request, $response) {
+    //$this->container->db;
+    //$connection = \DB::connection();
+    //$connection->useDefaultSchemaGrammar();
+    //$grammar = $connection->getSchemaGrammar();
+    //print_r($connection);
+    //return App\Models\CentroPoblado::first()->toJson();
+
+
+    $table = "lavalle.usuarios";
+    var_dump($table);
+    //$table = $connection->getTablePrefix().$table;
+    //$results = $connection->select($grammar->compileColumnListing($table));
+
+    //$results = \DB::schema()->getColumnListing($table);
+
+    //print_r($results);
+    $connection = \DB::schema()->getConnection();
+
+    list($schema, $table) = parseSchemaAndTable($table, $connection);
+    var_dump($schema);
+    var_dump($table);
+    //list($schema, $table) = parseSchemaAndTable($table, $connection);
+});
+
+function parseSchemaAndTable($table, $connection)
+{
+    $table = explode('.', $table);
+    if (is_array($schema = $connection->getConfig('schema'))) {
+        if (in_array($table[0], $schema)) {
+            return [array_shift($table), implode('.', $table)];
+        }
+        $schema = reset($schema);
+    }
+
+    if (count($table) > 1) {
+        $schema = array_shift($table);
+    }
+
+    return [$schema ?: 'public', implode('.', $table)];
+
+}

@@ -42,6 +42,8 @@ class ModelMakeCommand extends GeneratorCommand
      */
     public function handle()
     {
+        $this->info = $this->addPropAutoPK($this->option('table'));
+        return;
         if (parent::handle() === false && ! $this->option('force')) {
             return;
         }
@@ -88,6 +90,10 @@ class ModelMakeCommand extends GeneratorCommand
      */
     protected function replacePropsModel(&$stub)
     {
+        if ($this->option('plain')) {
+            return $this;
+        }
+
         $props = [];
 
         $table = $this->option('table') ?: str_plural(strtolower($this->getNameInput()));
@@ -96,17 +102,17 @@ class ModelMakeCommand extends GeneratorCommand
             $props[] = $this->addPropTable($this->option('table'));
         }
 
-        $primarykey = isset($this->option('primarykey')) and $this->option('primarykey') != 'id' ? $this->option('primarykey') : false;
-        $incrementing = isset($this->option('incrementing')) and $this->option('incrementing') == false ? false : true;
-        $keytype = isset($this->option('keytype')) and $this->option('keytype') != 'int' ? $this->option('keytype') : false;
+        $primarykey = (null !== $this->option('primarykey') and $this->option('primarykey') != 'id') ? $this->option('primarykey') : false;
+        $incrementing = (null !== $this->option('incrementing') and $this->option('incrementing') == false) ? false : true;
+        $keytype = (null !== $this->option('keytype') and $this->option('keytype') != 'int') ? $this->option('keytype') : false;
 
         if ($primarykey or !$incrementing or $keytype) {
             $props[] = $this->addPropPrimaryKey($primarykey, $incrementing, $keytype);
         }
 
-        $timestamps = isset($this->option('timestamps')) and $this->option('timestamps') == false ? false : true;
-        $created_at = isset($this->option('created_at')) and $this->option('keytype') != 'created_at' ? $this->option('created_at') : false;
-        $updated_at = isset($this->option('updated_at')) and $this->option('updated_at') != 'updated_at' ? $this->option('updated_at') : false;
+        $timestamps = (null !== $this->option('timestamps') and $this->option('timestamps') == false) ? false : true;
+        $created_at = (null !== $this->option('created_at') and $this->option('created_at') != 'created_at') ? $this->option('created_at') : false;
+        $updated_at = (null !== $this->option('updated_at') and $this->option('updated_at') != 'updated_at') ? $this->option('updated_at') : false;
 
         if (!$timestamps or $created_at or $updated_at) {
             $props[] = $this->addPropTimestamp($timestamps, $created_at, $updated_at);
@@ -115,8 +121,8 @@ class ModelMakeCommand extends GeneratorCommand
         if ($this->option('autofill')) {
             $props[] = $this->addPropAutoFill($table);
         } else {
-            $fillable = isset($this->option('fillable')) ? $this->option('fillable') : false;
-            $guarded = isset($this->option('guarded')) and $this->option('guarded') != '*' ? $this->option('guarded') : false;
+            $fillable = (null !== $this->option('fillable')) ? $this->option('fillable') : false;
+            $guarded = (null !== $this->option('guarded') and $this->option('guarded') != '*') ? $this->option('guarded') : false;
             $guarded = $fillable ? false : $guarded;
 
             if ($fillable or $guarded != false) {
@@ -124,31 +130,115 @@ class ModelMakeCommand extends GeneratorCommand
             }
         }
 
-        $stub = str_replace('DummyPropsModel', $props), $stub);
+        $props = implode(PHP_EOL, $props);
+
+        $stub = str_replace('DummyPropsModel', $props, $stub);
 
         return $this;
     }
 
     protected function addPropTable($table)
     {
-        
-        return "    /** Table Name */
+
+        return PHP_EOL."    /* Table Name */
     protected \$table = '$table';";
+    }
+
+    protected function addPropAutoPK($table = null)
+    {
+
+        $connection = \DB::schema()->getConnection();
+        $grammar = $connection->getSchemaGrammar();
+
+        $results = [];
+
+        if ($grammar instanceof \Illuminate\Database\Schema\Grammars\PostgresGrammar) {
+            list($schema, $table) = $this->parseSchemaAndTable($table, $connection);
+
+            print_r($schema, $table);
+
+            $results = $connection->select(
+                $this->compileColumnKey('pgsql'), [$schema, $table]
+            );
+
+            print_r($results);
+            if ($results) {
+
+            }
+
+            ['biginteger', 'integer', 'mediuminteger', 'smallinteger', 'tinyinteger']
+            /*return array_map(function ($result) {
+                return with((object) $result)->column_name;
+            }, $results);*/
+        } elseif ($grammar instanceof \Illuminate\Database\Schema\Grammars\SqlServerGrammar) {
+            //echo 'SqlServer';
+        } elseif ($grammar instanceof \Illuminate\Database\Schema\Grammars\SQLiteGrammar) {
+            //echo 'SQLite';
+        } elseif ($grammar instanceof \Illuminate\Database\Schema\Grammars\MySqlGrammar) {
+            $results = $connection->select(
+                $this->compileColumnKey('mysql'), [$connection->getDatabaseName(), $table]
+            );
+        }
+
+
+        //return $results;
+
+    }
+
+    protected function compileColumnKey($driver)
+    {
+        switch ($driver)
+        {
+        case 'mysql':
+            return 'select column_name, data_type, extra from information_schema.columns where column_key = \'PRI\' and table_schema = ? and table_name = ?';
+            case 'sqlite':
+                break;
+            case 'pgsql':
+                return 'select c.column_name, c.data_type, c.column_default as extra from information_schema.table_constraints tc join information_schema.constraint_column_usage AS ccu USING (constraint_schema, constraint_name) join information_schema.columns AS c ON c.table_schema = tc.constraint_schema AND tc.table_name = c.table_name AND ccu.column_name = c.column_name where constraint_type = \'PRIMARY KEY\' and tc.table_schema = ? and tc.table_name = ?';
+
+            case 'sqlsrv':
+                break;
+        }
+
+    }
+
+    /**
+     * Parse the table name and extract the schema and table.
+     *
+     * @param  string  $table
+     * @param  \Illuminate\Database\Connection  $connection
+     * @return array
+     */
+    protected function parseSchemaAndTable($table, $connection)
+    {
+        $table = explode('.', $table);
+        if (is_array($schema = $connection->getConfig('schema'))) {
+            if (in_array($table[0], $schema)) {
+                return [array_shift($table), implode('.', $table)];
+            }
+            $schema = reset($schema);
+        }
+
+        if (count($table) > 1) {
+            $schema = array_shift($table);
+        }
+
+        return [$schema ?: 'public', implode('.', $table)];
     }
 
     protected function addPropPrimaryKey($primaryKey, $incrementing, $keyType)
     {
-        $prop = '    /** Primary Key */';
+        $prop = PHP_EOL."    /* Primary Key */";
         if ($primaryKey) {
-            $prop .= "\n    protected \$primaryKey = '$primaryKey';"
+            $prop .= PHP_EOL."    protected \$primaryKey = '$primaryKey';";
         }
 
         if (!$incrementing) {
-            $prop .= "\n    public \$incrementing = false;"
+            $prop .= PHP_EOL."    public \$incrementing = false;";
         }
 
         if ($keyType) {
-            $prop .= "\n    protected \$keyType = '$keyType';"
+            $prop .= PHP_EOL."    protected \$keyType = '$keyType';";
         }
 
         return $prop;
@@ -156,17 +246,17 @@ class ModelMakeCommand extends GeneratorCommand
 
     protected function addPropTimestamp($timestamps, $created_at, $updated_at)
     {
-        $prop = '    /** Timestamps */';
+        $prop = PHP_EOL."    /* Timestamps */";
         if (!$timestamps) {
-            $prop .= "\n    public \$timestamps = false;"
+            $prop .= PHP_EOL."    public \$timestamps = false;";
         }
 
         if ($created_at) {
-            $prop .= "\n    const CREATED_AT = '$created_at';"
+            $prop .= PHP_EOL."    const CREATED_AT = '$created_at';";
         }
 
         if ($updated_at) {
-            $prop .= "\n    const UPDATED_AT = '$updated_at';"
+            $prop .= PHP_EOL."    const UPDATED_AT = '$updated_at';";
         }
 
         return $prop;
@@ -176,29 +266,29 @@ class ModelMakeCommand extends GeneratorCommand
     {
         // Get the table columns
         $columns = \DB::schema()->getColumnListing($table);
-        // Exclude the unwanted columns 
-        $columns = array_filter($columns, function($value) {
-          return !in_array($value, $this->exclude);
+        // Exclude the unwanted columns
+        $columns = array_filter($columns, function ($value) {
+            return !in_array($value, $this->exclude);
         });
         // Add quotes
-        array_walk($columns, function(&amp;$value) {
+        array_walk($columns, function (&$value) {
             $value = "'" . $value . "'";
         });
         // CSV format
         $columns = implode(',', $columns);
 
-        return "[$columns]";
+        return PHP_EOL."    /* Mass Assignment */".PHP_EOL."    protected \$fillable = [$columns];";
     }
 
     protected function addPropMassAssignment($fillable, $guarded)
     {
-        $prop = '    /** Mass Assignment */';
-        if (!$timestamps) {
-            $prop .= "\n    protected \$fillable = [$fillable];"
+        $prop = PHP_EOL."    /* Mass Assignment */";
+        if ($fillable) {
+            $prop .= PHP_EOL."    protected \$fillable = [$fillable];";
         }
 
-        if ($created_at) {
-            $prop .= "\n    protected \$guarded = [$guarded];"
+        if ($guarded != false) {
+            $prop .= PHP_EOL."    protected \$guarded = [$guarded];";
         }
 
         return $prop;
@@ -342,33 +432,33 @@ class ModelMakeCommand extends GeneratorCommand
 
 
 /*
-    // Table Names 
+    // Table Names
     protected $table = DummyTable;              //snake_plural
 
-    // Primary Keys 
+    // Primary Keys
     protected $primaryKey = DummyPrimaryKey;    //'id'
     public $incrementing = DummyIncrementing;   //true
     protected $keyType = DummyKeyType;          //'int'
 
-    // Timestamps 
+    // Timestamps
     public $timestamps = DummyTimestamps;       //true
     const CREATED_AT = DummyCreatedAt;          //'created_at'
     const UPDATED_AT = DummyUpdatedAt;          //'updated_at'
 
-    // Database Connection 
+    // Database Connection
     protected $connection = DummyConnection;    //default
 
-    // Default Attribute Values 
+    // Default Attribute Values
     protected $attributes = DummyAttributes;    //[]
 
-    // Mass Assignment 
+    // Mass Assignment
     protected $fillable = DummyFillable;        //[]
     protected $guarded = DummyGuarded;          //['*']
 
-    // Date Mutators 
+    // Date Mutators
     protected $dates = DummyDates;              //['created_at', 'updated_at']
 
-    // Hiding Attributes From JSON 
+    // Hiding Attributes From JSON
     protected $hidden = DummyHidden;            //[]
     protected $visible = DummyVisible;          //[]
 
