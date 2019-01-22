@@ -42,8 +42,6 @@ class ModelMakeCommand extends GeneratorCommand
      */
     public function handle()
     {
-        $this->info = $this->addPropAutoPK($this->option('table'));
-        return;
         if (parent::handle() === false && ! $this->option('force')) {
             return;
         }
@@ -102,12 +100,16 @@ class ModelMakeCommand extends GeneratorCommand
             $props[] = $this->addPropTable($this->option('table'));
         }
 
-        $primarykey = (null !== $this->option('primarykey') and $this->option('primarykey') != 'id') ? $this->option('primarykey') : false;
-        $incrementing = (null !== $this->option('incrementing') and $this->option('incrementing') == false) ? false : true;
-        $keytype = (null !== $this->option('keytype') and $this->option('keytype') != 'int') ? $this->option('keytype') : false;
+        if ($this->option('autopk')) {
+            $props[] = $this->addPropAutoPK($table);
+        } else {
+            $primarykey = (null !== $this->option('primarykey') and $this->option('primarykey') != 'id') ? $this->option('primarykey') : false;
+            $incrementing = (null !== $this->option('incrementing') and $this->option('incrementing') == false) ? false : true;
+            $keytype = (null !== $this->option('keytype') and $this->option('keytype') != 'int') ? $this->option('keytype') : false;
 
-        if ($primarykey or !$incrementing or $keytype) {
-            $props[] = $this->addPropPrimaryKey($primarykey, $incrementing, $keytype);
+            if ($primarykey or !$incrementing or $keytype) {
+                $props[] = $this->addPropPrimaryKey($primarykey, $incrementing, $keytype);
+            }
         }
 
         $timestamps = (null !== $this->option('timestamps') and $this->option('timestamps') == false) ? false : true;
@@ -190,14 +192,21 @@ class ModelMakeCommand extends GeneratorCommand
         switch ($driver)
         {
         case 'mysql':
-            return 'select column_name, data_type, extra from information_schema.columns where column_key = \'PRI\' and table_schema = ? and table_name = ?';
-            case 'sqlite':
-                break;
-            case 'pgsql':
-                return 'select c.column_name, c.data_type, c.column_default as extra from information_schema.table_constraints tc join information_schema.constraint_column_usage AS ccu USING (constraint_schema, constraint_name) join information_schema.columns AS c ON c.table_schema = tc.constraint_schema AND tc.table_name = c.table_name AND ccu.column_name = c.column_name where constraint_type = \'PRIMARY KEY\' and tc.table_schema = ? and tc.table_name = ?';
+            return 'select column_name, data_type, extra from information_schema.columns
+            where column_key = \'PRI\' and table_schema = ? and table_name = ?';
+        case 'sqlite':
+            break;
+        case 'pgsql':
+            return 'select c.column_name, c.data_type, c.column_default as extra
+            from information_schema.table_constraints tc join
+            information_schema.constraint_column_usage AS ccu
+            USING (constraint_schema, constraint_name)
+            join information_schema.columns AS c ON c.table_schema = tc.constraint_schema
+            AND tc.table_name = c.table_name AND ccu.column_name = c.column_name
+            where constraint_type = \'PRIMARY KEY\' and tc.table_schema = ? and tc.table_name = ?';
 
-            case 'sqlsrv':
-                break;
+        case 'sqlsrv':
+            break;
         }
 
     }
