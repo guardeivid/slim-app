@@ -96,12 +96,15 @@ class ModelMakeCommand extends GeneratorCommand
 
         $table = $this->option('table') ?: str_plural(strtolower($this->getNameInput()));
 
+        // Table Name
         if ($this->option('table')) {
-            $props[] = $this->addPropTable($this->option('table'));
+            $props[] = $this->addPropTable($table);
         }
 
+        // Primary Key
         if ($this->option('autopk')) {
-            $props[] = $this->addPropAutoPK($table);
+            $autopk = $this->addPropAutoPK($table);
+            count($autopk) > 0 ? $props[] = $autopk : null;
         } else {
             $primarykey = (null !== $this->option('primarykey') and $this->option('primarykey') != 'id') ? $this->option('primarykey') : false;
             $incrementing = (null !== $this->option('incrementing') and $this->option('incrementing') == false) ? false : true;
@@ -112,6 +115,7 @@ class ModelMakeCommand extends GeneratorCommand
             }
         }
 
+        // Timestamps
         $timestamps = (null !== $this->option('timestamps') and $this->option('timestamps') == false) ? false : true;
         $created_at = (null !== $this->option('created_at') and $this->option('created_at') != 'created_at') ? $this->option('created_at') : false;
         $updated_at = (null !== $this->option('updated_at') and $this->option('updated_at') != 'updated_at') ? $this->option('updated_at') : false;
@@ -120,6 +124,7 @@ class ModelMakeCommand extends GeneratorCommand
             $props[] = $this->addPropTimestamp($timestamps, $created_at, $updated_at);
         }
 
+        // Mass Assignment
         if ($this->option('autofill')) {
             $props[] = $this->addPropAutoFill($table);
         } else {
@@ -156,35 +161,34 @@ class ModelMakeCommand extends GeneratorCommand
 
         if ($grammar instanceof \Illuminate\Database\Schema\Grammars\PostgresGrammar) {
             list($schema, $table) = $this->parseSchemaAndTable($table, $connection);
-
-            print_r($schema, $table);
-
-            $results = $connection->select(
-                $this->compileColumnKey('pgsql'), [$schema, $table]
-            );
-
-            print_r($results);
-            if ($results) {
-
-            }
-
-            ['biginteger', 'integer', 'mediuminteger', 'smallinteger', 'tinyinteger']
-            /*return array_map(function ($result) {
-                return with((object) $result)->column_name;
-            }, $results);*/
+            $results = $connection->select($this->compileColumnKey('pgsql'), [$schema, $table]);
         } elseif ($grammar instanceof \Illuminate\Database\Schema\Grammars\SqlServerGrammar) {
             //echo 'SqlServer';
         } elseif ($grammar instanceof \Illuminate\Database\Schema\Grammars\SQLiteGrammar) {
-            //echo 'SQLite';
+            $results = $connection->select($grammar->compileColumnListing($table));
+            $results = $this->processColumnKey($results);
         } elseif ($grammar instanceof \Illuminate\Database\Schema\Grammars\MySqlGrammar) {
             $results = $connection->select(
                 $this->compileColumnKey('mysql'), [$connection->getDatabaseName(), $table]
             );
         }
 
+        if ($results) {
+            //var_dump($results);
+            $primaryKey = $results[0]->column_name;
+            $incrementing = $results[0]->extra;
+            $keyType = $results[0]->data_type;
 
+            $primaryKey = (isset($primaryKey) and $primaryKey != 'id') ? $primaryKey : false;
+
+            $integer = ['biginteger', 'integer', 'mediuminteger', 'smallinteger', 'tinyinteger', 'bigint', 'int', 'mediumint', 'smallint', 'tinyint'];
+
+            $keyType = in_array($keyType, $integer) ? false : 'string';
+            if ($primaryKey or !$incrementing or $keyType) {
+                return $this->addPropPrimaryKey($primaryKey, $incrementing, $keyType);
+            }
+        }
         //return $results;
-
     }
 
     protected function compileColumnKey($driver)
@@ -194,8 +198,6 @@ class ModelMakeCommand extends GeneratorCommand
         case 'mysql':
             return 'select column_name, data_type, extra from information_schema.columns
             where column_key = \'PRI\' and table_schema = ? and table_name = ?';
-        case 'sqlite':
-            break;
         case 'pgsql':
             return 'select c.column_name, c.data_type, c.column_default as extra
             from information_schema.table_constraints tc join
@@ -204,11 +206,9 @@ class ModelMakeCommand extends GeneratorCommand
             join information_schema.columns AS c ON c.table_schema = tc.constraint_schema
             AND tc.table_name = c.table_name AND ccu.column_name = c.column_name
             where constraint_type = \'PRIMARY KEY\' and tc.table_schema = ? and tc.table_name = ?';
-
         case 'sqlsrv':
             break;
         }
-
     }
 
     /**
@@ -233,6 +233,19 @@ class ModelMakeCommand extends GeneratorCommand
         }
 
         return [$schema ?: 'public', implode('.', $table)];
+    }
+
+    protected function processColumnKey($results)
+    {
+        return array_map(function ($result) {
+            if ($result->pk == '1') {
+                return (object)[
+                    'column_name' => $result->name,
+                    'data_type' => $result->type == 'INTEGER' ? 'int' : 'string',
+                    'extra' => false,
+                ];
+            }
+        }, $results);
     }
 
     protected function addPropPrimaryKey($primaryKey, $incrementing, $keyType)
@@ -285,6 +298,8 @@ class ModelMakeCommand extends GeneratorCommand
         });
         // CSV format
         $columns = implode(',', $columns);
+
+        //return $this->addPropMassAssignment($columns, false);
 
         return PHP_EOL."    /* Mass Assignment */".PHP_EOL."    protected \$fillable = [$columns];";
     }

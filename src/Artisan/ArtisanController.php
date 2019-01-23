@@ -111,6 +111,7 @@ class ArtisanController extends Controller
             'plain'     => Input::post('plain'),
             'soft'      => Input::post('soft'),
             'table'     => Input::post('table'),
+            'autopk'    => Input::post('autopk'),
             'primarykey'=> Input::post('primarykey'),
             'incrementing'=> Input::post('incrementing'),
             'keytype'   => Input::post('keytype'),
