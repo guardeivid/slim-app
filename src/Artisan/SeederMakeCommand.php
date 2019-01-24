@@ -57,6 +57,9 @@ class SeederMakeCommand extends GeneratorCommand
      */
     protected function getStub()
     {
+        if ($this->option('model')) {
+            return __DIR__.'/stubs/seeder.model.stub';
+        }
         return __DIR__.'/stubs/seeder.stub';
     }
 
@@ -80,5 +83,46 @@ class SeederMakeCommand extends GeneratorCommand
     protected function qualifyClass($name)
     {
         return $name;
+    }
+
+    /**
+     * Build the class with the given name.
+     *
+     * @param  string  $name
+     * @return string
+     * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
+     */
+    protected function buildClass($name)
+    {
+        $stub = $this->files->get($this->getStub());
+
+        return $this->replaceNamespace($stub, $name)->replaceModel($stub)->replaceClass($stub, $name);
+    }
+
+    /**
+     * Replace the model for the given stub.
+     *
+     * @param  string  $stub
+     * @return $this
+     */
+    protected function replaceModel(&$stub)
+    {
+        if ($this->option('model')) {
+             $stub = str_replace('DummyModel', $this->option('model'), $stub);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Get the console command options.
+     *
+     * @return array
+     */
+    protected function getOptions()
+    {
+        return [
+            ['model', 'm', 'Generate a seeder for the given model.'],
+        ];
     }
 }

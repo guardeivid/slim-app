@@ -12,6 +12,7 @@ use SlimApp\Artisan\MigrationCreator;
 use SlimApp\Artisan\MigrateMakeCommand;
 use SlimApp\Artisan\ModelMakeCommand;
 use SlimApp\Artisan\RuleMakeCommand;
+use SlimApp\Artisan\SeederMakeCommand;
 use SlimApp\Artisan\InstallCommand;
 use SlimApp\Artisan\RouteListCommand;
 use SlimApp\Artisan\MigrateCommand;
@@ -144,7 +145,11 @@ class ArtisanController extends Controller
      */
     public function makeSeeder($request, $response)
     {
-        $a = new SeederMakeCommand($this->file, ['name' => Input::post('name')]);
+        $a = new SeederMakeCommand($this->file, [
+            'name'  => Input::post('name'),
+            'model' => Input::post('model'),
+            'force' => Input::post('force'),
+        ]);
 
         return $response->withJson(['info'  => $a->info, 'error' => $a->error]);
     }
