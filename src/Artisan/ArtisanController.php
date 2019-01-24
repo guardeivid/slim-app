@@ -8,7 +8,6 @@ use \Container;
 use Illuminate\Filesystem\Filesystem;
 use SlimApp\Artisan\ControllerMakeCommand;
 use SlimApp\Artisan\MiddlewareMakeCommand;
-use SlimApp\Artisan\MigrationCreator;
 use SlimApp\Artisan\MigrateMakeCommand;
 use SlimApp\Artisan\ModelMakeCommand;
 use SlimApp\Artisan\RuleMakeCommand;
@@ -80,7 +79,6 @@ class ArtisanController extends Controller
     public function makeMigration($request, $response)
     {
         $a = new MigrateMakeCommand(
-            new MigrationCreator($this->file),
             $this->file, [
                 'name'   => Input::post('name'),
                 'table'  => Input::post('table'),
@@ -317,7 +315,7 @@ class ArtisanController extends Controller
                 'step'          => (int) Input::post('step'),
             ]);
         } else {
-            return $response->withJson(['notes'  => ['Command not support in version '.$version.' installed of illuminate\\database']]);
+            return $response->withJson(['notes'  => ['<critical>Command not support in version '.$version.' installed of illuminate\\database</critical>']]);
         }
 
         return $response->withJson(['notes'  => $a->note]);

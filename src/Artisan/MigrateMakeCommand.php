@@ -4,7 +4,7 @@ namespace SlimApp\Artisan;
 
 use Illuminate\Support\Str;
 use Illuminate\Filesystem\Filesystem;
-use Illuminate\Database\Migrations\MigrationCreator;
+use SlimApp\Artisan\MigrationCreator;
 use SlimApp\Artisan\GeneratorCommand;
 
 class MigrateMakeCommand extends GeneratorCommand
@@ -46,12 +46,12 @@ class MigrateMakeCommand extends GeneratorCommand
     /**
      * Create a new migration install command instance.
      *
-     * @param  \Illuminate\Database\Migrations\MigrationCreator
+     * @param  \Illuminate\Filesystem\Filesystem $files file
      * @return void
      */
-    public function __construct(MigrationCreator $creator, Filesystem $files, $options)
+    public function __construct(Filesystem $files, $options)
     {
-        $this->creator = $creator;
+        $this->creator = new MigrationCreator($files, $options);
 
         parent::__construct($files, $options);
     }
