@@ -18,7 +18,9 @@ class MigrateMakeCommand extends GeneratorCommand
         {--create= : The table to be created}
         {--table= : The table to migrate}
         {--path= : The location where the migration file should be created}
-        {--realpath : Indicate any provided migration file paths are pre-resolved absolute paths}';
+        {--realpath : Indicate any provided migration file paths are pre-resolved absolute paths}
+        {--custom : Indicate if is custom migration}
+        {--schema= : The schema to migrate}';
 
     /**
      * The console command description.

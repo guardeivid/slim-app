@@ -27,7 +27,7 @@ class ArtisanController extends Controller
     public function __construct()
     {
         parent::__construct(Container::self());
-        $this->file = new \Illuminate\Filesystem\Filesystem;
+        $this->file = new Filesystem;
     }
 
 
@@ -40,7 +40,7 @@ class ArtisanController extends Controller
         $this->view->render($response, 'artisan/index.twig');
     }
 
-    /**
+    /*
      * Create a new controller class in app/Controllers folder.
      */
     public function makeController($request, $response, $args)
@@ -86,6 +86,9 @@ class ArtisanController extends Controller
                 'path'     => null, //save in database/migrations
                 'realpath' => null,
                 'force'  => Input::post('force'),
+
+                'custom'  => Input::post('custom'),
+                'schema'  => Input::post('schema'),
             ]
         );
 
@@ -165,8 +168,6 @@ class ArtisanController extends Controller
      */
     public function routeList($request, $response)
     {
-        $sort = ['method, uri, name, action'];
-
         $a = new RouteListCommand($this->router, [
             'method' => Input::post('method') ?: false,
             'name' => Input::post('name') ?: false,

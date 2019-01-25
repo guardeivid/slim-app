@@ -3,6 +3,8 @@
 namespace SlimApp\Artisan;
 
 use Illuminate\Database\Migrations\MigrationCreator as Migration;
+use SlimApp\Artisan\SchemaParser;
+use SlimApp\Artisan\SyntaxBuilder;
 
 class MigrationCreator extends Migration
 {
@@ -29,13 +31,13 @@ class MigrationCreator extends Migration
     protected function getStub($table, $create)
     {
         if (is_null($table)) {
-            return $this->files->get($this->stubPath().'/blank.stub');
+            return $this->files->get($this->stubPath().'/migration.blank.stub');
         }
 
-        $stub = $create ? 'create.stub' : 'update.stub';
+        $stub = $create ? 'migration.create.stub' : 'migration.update.stub';
 
         if ($this->option('custom')) {
-            $stub = str_replace('.stub', '.custom.stub', $stub);
+            $stub = 'migration.custom.stub';
         }
 
         return $this->files->get($this->stubPath()."/{$stub}");
@@ -63,12 +65,16 @@ class MigrationCreator extends Migration
     {
         $stub = str_replace('DummyClass', $this->getClassName($name), $stub);
 
-        if (! is_null($table)) {
-            $stub = str_replace('DummyTable', $table, $stub);
+        if ($this->option('custom')) {
+            if ($schema = $this->option('schema')) {
+                $schema = (new SchemaParser)->parse($schema);
+            }
+            $schema = (new SyntaxBuilder)->create($schema, $this->option('action'), $table);
+            $stub = str_replace(['DummySchemaUp', 'DummySchemaDown'], $schema, $stub);
         }
 
-        if ($this->option('custom')) {
-            //$stub = str_replace('.stub', '.custom.stub', $stub);
+        if (! is_null($table)) {
+            $stub = str_replace('DummyTable', $table, $stub);
         }
 
         return $stub;

@@ -1,0 +1,3 @@
+Capsule::schema()->table('DummyTable', function (Blueprint $table) {
+            DummySchemaUp
+        });
