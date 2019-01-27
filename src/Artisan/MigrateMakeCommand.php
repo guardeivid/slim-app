@@ -91,9 +91,7 @@ class MigrateMakeCommand extends GeneratorCommand
             list($table, $create) = $this->guess($name);
         }
 
-        // Now we are ready to write the migration out to disk. Once we've written
-        // the migration out, we will dump-autoload for the entire framework to
-        // make sure that the migrations are registered by the class loaders.
+        // Now we are ready to write the migration out to disk.
         $this->writeMigration($name, $table, $create);
     }
 

@@ -2,6 +2,7 @@
 
 namespace SlimApp\Artisan;
 
+use Illuminate\Filesystem\Filesystem;
 use Illuminate\Database\Migrations\MigrationCreator as Migration;
 use SlimApp\Artisan\SchemaParser;
 use SlimApp\Artisan\SyntaxBuilder;
