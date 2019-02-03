@@ -174,6 +174,10 @@ class SyntaxBuilder
      */
     private function addColumn($field)
     {
+        if ($field['type'] === 'fx') {
+            return sprintf("\$table->%s();", $field['name']);
+        }
+
         $syntax = sprintf("\$table->%s('%s')", $field['type'], $field['name']);
 
         // If there are arguments for the schema type, like decimal('amount', 5, 2)

@@ -1,5 +1,3 @@
 Capsule::schema()->create('DummyTable', function (Blueprint $table) {
-            $table->increments('id');
             DummySchemaUp
-            $table->timestamps();
         });

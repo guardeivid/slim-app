@@ -87,7 +87,7 @@ class ArtisanController extends Controller
                 'realpath' => null,
                 'force'  => Input::post('force'),
 
-                'custom'  => Input::post('custom') ?: true,
+                'custom'  => Input::post('custom'),
                 'schema'  => Input::post('schema') ?: 'email:string(100):unique:nullable:default("foo@example.com")',
                 'action'  => Input::post('action') ?: 'create',
             ]
