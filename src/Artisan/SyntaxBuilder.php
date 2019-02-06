@@ -178,19 +178,21 @@ class SyntaxBuilder
             return sprintf("\$table->%s();", $field['name']);
         }
 
+        $sep = '';
+
         if ($field['type'] === 'index') {
             $syntax = sprintf("\$table->%s()", $field['name']);
         } else if ($field['type'] === 'foreign') {
             $syntax = sprintf("\$table->foreign()");
         } else {
             $syntax = sprintf("\$table->%s('%s')", $field['type'], $field['name']);
+            $sep = ', ';
         }
 
 
         // If there are arguments for the schema type, like decimal('amount', 5, 2)
-        // then we have to remember to work those in.
         if ($field['arguments']) {
-            $syntax = substr($syntax, 0, -1) . ', ';
+            $syntax = substr($syntax, 0, -1) . $sep;
 
             $syntax .= implode(', ', $field['arguments']) . ')';
         }
