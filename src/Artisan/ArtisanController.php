@@ -88,7 +88,7 @@ class ArtisanController extends Controller
                 'force'  => Input::post('force'),
 
                 'custom'  => Input::post('custom'),
-                'schema'  => Input::post('schema') ?: 'email:string(100):unique:nullable:default("foo@example.com")',
+                'schema'  => Input::post('schema'),
                 'action'  => Input::post('action') ?: 'create',
             ]
         );
